@@ -25,7 +25,7 @@ export const MediaGallery: React.FC = () => {
               <Image className="w-4 h-4" />
               <span>Verified Scientific Photography & Earth Observation Imagery</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white font-mono tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">
               🖼️ Polar Media Gallery
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
@@ -92,7 +92,7 @@ export const MediaGallery: React.FC = () => {
         {/* Full Image Preview Lightbox Modal */}
         {previewMedia && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-polar-950/90 backdrop-blur-md">
-            <div className="w-full max-w-4xl bg-polar-900 border border-polar-750 rounded-3xl overflow-hidden shadow-2xl space-y-4">
+            <div className="w-full max-w-4xl bg-polar-900 border border-ink-700 overflow-hidden space-y-4">
               <div className="relative h-96 sm:h-[450px] w-full bg-polar-950 flex items-center justify-center">
                 <img
                   src={previewMedia.imageUrl}

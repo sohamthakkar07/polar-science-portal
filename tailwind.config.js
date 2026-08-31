@@ -44,6 +44,12 @@ export default {
           300: '#70ccbe',
           200: '#9dddd5',
         },
+        frost: {
+          cyan:  '#5ba3c9',
+          teal:  '#4db8a8',
+          blue:  '#3d7fa8',
+          white: '#e8f4f8',
+        },
         slate: {
           925: '#0f1620',
           950: '#0a0f18',
@@ -61,6 +67,8 @@ export default {
         'panel': '0 4px 12px 0 rgba(0,0,0,0.35)',
         'elevated': '0 8px 24px 0 rgba(0,0,0,0.4)',
         'inner-sm': 'inset 0 1px 2px 0 rgba(0,0,0,0.3)',
+        'polar-glow': '0 0 20px 0 rgba(91,163,201,0.15)',
+        'ice-glow': '0 0 12px 0 rgba(91,163,201,0.2)',
       },
       borderRadius: {
         'DEFAULT': '4px',
@@ -68,6 +76,8 @@ export default {
         'md': '6px',
         'lg': '8px',
         'xl': '12px',
+        '2xl': '16px',
+        '3xl': '24px',
       },
       spacing: {
         '18': '4.5rem',
@@ -82,6 +92,20 @@ export default {
       },
       transitionTimingFunction: {
         'ease-out-quad': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+      },
+      keyframes: {
+        'fade-in': {
+          '0%': { opacity: '0', transform: 'translateY(4px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'slide-up': {
+          '0%': { opacity: '0', transform: 'translateY(16px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        'fade-in': 'fade-in 0.2s ease-out',
+        'slide-up': 'slide-up 0.3s ease-out',
       },
     },
   },

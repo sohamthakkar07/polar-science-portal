@@ -102,7 +102,7 @@ export const PolarExplorer: React.FC<PolarExplorerProps> = ({ onNavigate, initia
               <Compass className="w-4 h-4" />
               <span>Interactive Geographic Interoperability Layer</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white font-mono tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">
               🗺️ Polar Explorer & Research Stations
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl">

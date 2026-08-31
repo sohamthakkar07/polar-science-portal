@@ -52,7 +52,7 @@ export const StationDetailDrawer: React.FC<StationDetailDrawerProps> = ({ statio
                 Est. {station.establishedYear}
               </span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-white font-mono flex items-center gap-2">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-white flex items-center gap-2">
               {station.name}
               {station.nativeName && (
                 <span className="text-lg font-normal text-slate-300">({station.nativeName})</span>

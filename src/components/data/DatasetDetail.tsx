@@ -78,7 +78,7 @@ export const DatasetDetail: React.FC<DatasetDetailProps> = ({ dataset, onBack, o
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-black text-white font-mono tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-4xl font-bold text-white tracking-tight leading-tight">
             {dataset.title}
           </h1>
 

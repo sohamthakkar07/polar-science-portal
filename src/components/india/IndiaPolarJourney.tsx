@@ -59,14 +59,14 @@ export const IndiaPolarJourney: React.FC<IndiaPolarJourneyProps> = ({ onNavigate
     <div className="w-full min-h-screen bg-polar-950 text-slate-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-12">
         {/* Hero Header */}
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-orange-950/50 via-polar-900 to-polar-950 border border-orange-500/30 p-8 sm:p-12 shadow-2xl">
+        <div className="relative overflow-hidden bg-gradient-to-br from-orange-950/50 via-polar-900 to-polar-950 border border-orange-500/30 p-8 sm:p-12">
           <div className="max-w-3xl space-y-4">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-orange-950/80 border border-orange-500/50 text-orange-400 text-xs font-semibold">
               <Flag className="w-3.5 h-3.5" />
               <span>National Centre for Polar and Ocean Research (NCPOR), Ministry of Earth Sciences</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl font-black text-white font-mono tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-5xl font-bold text-white tracking-tight leading-tight">
               🇮🇳 India’s Polar Journey
             </h1>
 
@@ -98,7 +98,7 @@ export const IndiaPolarJourney: React.FC<IndiaPolarJourneyProps> = ({ onNavigate
         {/* Dedicated Station Selector Tabs */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg sm:text-2xl font-black text-white font-mono flex items-center gap-2">
+            <h2 className="text-lg sm:text-2xl font-semibold text-white flex items-center gap-2">
               <span>🏛️ Indian Polar Observatories & Stations</span>
             </h2>
             <span className="text-xs text-slate-400 font-mono">4 Permanent Bases + 1 Mooring</span>
@@ -129,7 +129,7 @@ export const IndiaPolarJourney: React.FC<IndiaPolarJourneyProps> = ({ onNavigate
         </div>
 
         {/* Selected Station Deep-Dive Dossier */}
-        <div className="bg-polar-900/90 rounded-3xl border border-polar-750 p-6 sm:p-8 shadow-2xl space-y-8 backdrop-blur-xl">
+        <div className="bg-polar-900 border border-ink-700 p-6 sm:p-8 space-y-8">
           {/* Station Dossier Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-polar-800 pb-6">
             <div>
@@ -141,7 +141,7 @@ export const IndiaPolarJourney: React.FC<IndiaPolarJourneyProps> = ({ onNavigate
                   {activeStation.status}
                 </span>
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black text-white font-mono flex items-center gap-2">
+              <h2 className="text-2xl sm:text-4xl font-bold text-white flex items-center gap-2">
                 {activeStation.name}
                 {activeStation.nativeName && (
                   <span className="text-xl text-orange-400">({activeStation.nativeName})</span>
@@ -269,7 +269,7 @@ export const IndiaPolarJourney: React.FC<IndiaPolarJourneyProps> = ({ onNavigate
               <Calendar className="w-4 h-4" />
               <span>Historical Chronology</span>
             </div>
-            <h2 className="text-xl sm:text-3xl font-black text-white font-mono">
+            <h2 className="text-xl sm:text-3xl font-semibold text-white">
               The Indian Polar Timeline (1981–Present)
             </h2>
           </div>
@@ -281,7 +281,7 @@ export const IndiaPolarJourney: React.FC<IndiaPolarJourneyProps> = ({ onNavigate
                 className="p-5 rounded-2xl bg-polar-900/80 border border-polar-800 hover:border-orange-500/40 transition-all space-y-2 flex flex-col justify-between"
               >
                 <div>
-                  <div className="text-xl font-black text-orange-400 font-mono">{m.year}</div>
+                  <div className="text-xl font-bold text-orange-400">{m.year}</div>
                   <h3 className="text-xs font-bold text-white mt-1">{m.title}</h3>
                   <p className="text-xs text-slate-300 leading-relaxed mt-2">{m.desc}</p>
                 </div>

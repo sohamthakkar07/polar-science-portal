@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -43,12 +43,13 @@
     color: #e8eef4;
   }
 
-  /* Headings */
+  /* Headings — consistent across all pages */
   h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
     line-height: 1.3;
     letter-spacing: -0.02em;
     color: #f0f4f8;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
   /* Links */
@@ -87,6 +88,7 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: #7a90a8;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   /* Code */
@@ -100,6 +102,7 @@
   /* Scientific metadata label */
   .meta-label {
     @apply text-2xs font-medium tracking-widest uppercase text-slate-500;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   /* Clean bordered section divider */
@@ -111,6 +114,7 @@
   .btn-primary {
     @apply inline-flex items-center gap-2 px-5 py-2.5 bg-ice-500 hover:bg-ice-400 
            text-polar-950 font-semibold text-sm rounded-md transition-colors duration-150;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   /* Ghost button */
@@ -118,6 +122,19 @@
     @apply inline-flex items-center gap-2 px-4 py-2 border border-ink-700 
            hover:border-ice-400 text-slate-300 hover:text-white font-medium text-sm 
            rounded-md transition-colors duration-150;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Student mode button */
+  .btn-student {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 bg-teal-500 hover:bg-teal-400
+           text-white font-semibold text-sm rounded-md transition-colors duration-150;
+  }
+
+  /* Researcher mode button */
+  .btn-researcher {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 bg-ice-600 hover:bg-ice-500
+           text-white font-semibold text-sm rounded-md transition-colors duration-150;
   }
 
   /* Text link with arrow */
@@ -130,6 +147,13 @@
   .tag {
     @apply inline-block px-2 py-0.5 text-2xs font-medium uppercase tracking-wider 
            border border-ink-700 text-slate-400 rounded-sm;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Topic / discipline tag */
+  .discipline-tag {
+    @apply inline-block px-2.5 py-0.5 text-2xs font-semibold uppercase tracking-wider
+           border border-ice-600/40 text-ice-400 rounded-sm bg-ice-600/10;
   }
 
   /* Scientific data table row */
@@ -140,6 +164,54 @@
   /* Panel / Card */
   .panel {
     @apply bg-ink-800 border border-ink-700 rounded-lg;
+  }
+
+  /* Student content card */
+  .student-card {
+    @apply bg-polar-900 border border-ink-700 rounded-lg p-5;
+  }
+
+  /* Researcher content card */
+  .researcher-card {
+    @apply bg-polar-900 border border-polar-700 rounded-lg p-5;
+  }
+
+  /* Section header with line accent */
+  .section-header {
+    @apply flex items-center gap-2 mb-3;
+  }
+
+  /* Page section spacing */
+  .page-section {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20;
+  }
+
+  /* Mode badge — student */
+  .mode-student {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full 
+           bg-teal-500/10 border border-teal-500/30 text-teal-400 text-xs font-semibold;
+  }
+
+  /* Mode badge — researcher */
+  .mode-researcher {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full 
+           bg-ice-500/10 border border-ice-500/30 text-ice-400 text-xs font-semibold;
+  }
+
+  /* Fact card — for student mode */
+  .fact-card {
+    @apply p-4 rounded-lg border border-ink-700 bg-polar-900;
+  }
+
+  /* Provenance notice */
+  .provenance-notice {
+    @apply flex items-start gap-2 p-3 rounded-md bg-polar-950 border border-ink-700 text-2xs text-slate-500;
+  }
+
+  /* Animated underline link */
+  .hover-line {
+    @apply relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px 
+           after:bg-ice-400 after:transition-all after:duration-200 hover:after:w-full;
   }
 }
 
@@ -152,6 +224,33 @@
     scrollbar-width: none;
   }
 
+  /* Animation utilities */
+  .animate-in {
+    animation-fill-mode: both;
+  }
+
+  .fade-in {
+    animation-name: fade-in;
+    animation-duration: 0.2s;
+    animation-timing-function: ease-out;
+  }
+
+  .slide-up {
+    animation-name: slide-up;
+    animation-duration: 0.3s;
+    animation-timing-function: ease-out;
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   /* Reduce motion */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -159,5 +258,18 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+  }
+
+  /* Text balance */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Grid auto-fit patterns */
+  .grid-auto-fit-sm {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+  .grid-auto-fit-md {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   }
 }

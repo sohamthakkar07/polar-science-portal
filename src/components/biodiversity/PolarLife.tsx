@@ -42,7 +42,7 @@ export const PolarLife: React.FC<PolarLifeProps> = ({ onNavigate, initialSpecies
               <Compass className="w-4 h-4" />
               <span>SCAR & OBIS Biodiversity Clearing-House</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white font-mono tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">
               🐧 Polar Life & Biodiversity
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
@@ -59,7 +59,7 @@ export const PolarLife: React.FC<PolarLifeProps> = ({ onNavigate, initialSpecies
               <button
                 key={species.id}
                 onClick={() => setSelectedSpeciesId(species.id)}
-                className={`p-3.5 rounded-2xl text-left border transition-all ${
+                className={`p-3.5 rounded-md text-left border transition-all ${
                   isSelected
                     ? 'bg-polar-800 border-emerald-500 text-white shadow-lg'
                     : 'bg-polar-900 border-polar-800 text-slate-400 hover:bg-polar-850 hover:text-slate-200'
@@ -74,12 +74,12 @@ export const PolarLife: React.FC<PolarLifeProps> = ({ onNavigate, initialSpecies
         </div>
 
         {/* Active Species Detail Card */}
-        <div className="bg-polar-900/90 rounded-3xl border border-polar-750 p-6 sm:p-8 shadow-2xl space-y-8 backdrop-blur-xl">
+        <div className="bg-polar-900 border border-ink-700 p-6 sm:p-8 space-y-8">
           {/* Header with Title & IUCN Status */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-polar-800 pb-6">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-polar-800 border border-polar-700 text-frost-cyan">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-polar-800 border border-polar-700 text-ice-400">
                   {activeSpecies.group}
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-polar-800 border border-polar-700 text-slate-300">
@@ -89,7 +89,7 @@ export const PolarLife: React.FC<PolarLifeProps> = ({ onNavigate, initialSpecies
                   IUCN: {activeSpecies.conservationStatus}
                 </span>
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black text-white font-mono">
+              <h2 className="text-2xl sm:text-3xl font-semibold text-white">
                 {activeSpecies.commonName}
               </h2>
               <p className="text-sm font-serif italic text-emerald-400 mt-0.5">
@@ -154,7 +154,7 @@ export const PolarLife: React.FC<PolarLifeProps> = ({ onNavigate, initialSpecies
                   {activeSpecies.coordinatesDistribution.map((coord, i) => (
                     <div key={i} className="text-[11px] text-slate-300 font-mono flex items-center justify-between">
                       <span>{coord.name}</span>
-                      <span className="text-frost-cyan">
+                      <span className="text-ice-400">
                         {Math.abs(coord.lat).toFixed(1)}°{coord.lat < 0 ? 'S' : 'N'}, {Math.abs(coord.lon).toFixed(1)}°{coord.lon < 0 ? 'W' : 'E'}
                       </span>
                     </div>

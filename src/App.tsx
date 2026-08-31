@@ -6,10 +6,14 @@ import { Navbar, NavTab } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { UniversalSearchModal } from './components/search/UniversalSearchModal';
 
-// Views
+// Home Views
 import { HeroSection } from './components/home/HeroSection';
 import { PolarTopicGrid } from './components/home/PolarTopicGrid';
 import { IndiaPolarBanner } from './components/home/IndiaPolarBanner';
+import { InteroperabilitySection } from './components/home/InteroperabilitySection';
+import { SourceEcosystem } from './components/home/SourceEcosystem';
+
+// Feature Views
 import { PolarExplorer } from './components/map/PolarExplorer';
 import { DataDiscovery } from './components/data/DataDiscovery';
 import { DataStories } from './components/data/DataStories';
@@ -55,8 +59,10 @@ const AppContent: React.FC = () => {
         {currentTab === 'home' && (
           <div>
             <HeroSection onSelectTab={handleNavigate} />
+            <InteroperabilitySection />
             <PolarTopicGrid onSelectTopic={handleSelectTopicFromHome} onNavigate={handleNavigate} />
             <IndiaPolarBanner onNavigate={handleNavigate} />
+            <SourceEcosystem />
           </div>
         )}
 

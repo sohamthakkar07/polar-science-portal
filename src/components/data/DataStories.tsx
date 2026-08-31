@@ -78,7 +78,7 @@ export const DataStories: React.FC<DataStoriesProps> = ({ onNavigate, initialSto
             <Sparkles className="w-4 h-4 text-frost-teal" />
             <span>Signature Interactive Experience</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-white font-mono tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-semibold text-white tracking-tight">
             📊 Interactive Data Stories
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mx-auto">
@@ -137,7 +137,7 @@ export const DataStories: React.FC<DataStoriesProps> = ({ onNavigate, initialSto
               <span className="text-xs font-bold uppercase tracking-wider text-frost-teal font-mono">
                 {step.phaseTitle}
               </span>
-              <h2 className="text-xl sm:text-3xl font-black text-white font-mono mt-1">
+              <h2 className="text-xl sm:text-3xl font-semibold text-white mt-1">
                 {step.headline}
               </h2>
             </div>

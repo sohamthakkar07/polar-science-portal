@@ -143,7 +143,7 @@ export const AdminCuration: React.FC = () => {
               <ShieldCheck className="w-4 h-4" />
               <span>Scientific Data Curation & Provenance Verification</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white font-mono tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">
               🛡️ Admin & Curation Dashboard
             </h1>
           </div>
