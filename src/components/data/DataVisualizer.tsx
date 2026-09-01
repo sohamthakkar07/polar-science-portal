@@ -1,20 +1,5 @@
-import React, { useState } from 'react';
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ReferenceLine
-} from 'recharts';
-import { Download, BarChart2, Table as TableIcon, Info, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Download, BarChart2, Table as TableIcon, Info, ShieldCheck, FileSpreadsheet, Layers } from 'lucide-react';
 import {
   SEA_ICE_EXTENT_SERIES,
   POLAR_TEMPERATURE_ANOMALY,
@@ -42,26 +27,22 @@ export const DataVisualizer: React.FC<DataVisualizerProps> = ({
   compact = false
 }) => {
   const [viewMode, setViewMode] = useState<'line' | 'area' | 'table'>('line');
-  const [activeSeries, setActiveSeries] = useState<Record<string, boolean>>({
-    series1: true,
-    series2: true,
-    series3: true,
-  });
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   // Resolve data and config based on datasetKey
-  const { data, lines, yAxisLabel, defaultTitle, defaultUnit } = React.useMemo(() => {
+  const { data, lines, yAxisLabel, defaultTitle, defaultUnit } = useMemo(() => {
     switch (datasetKey) {
       case 'sea_ice_extent':
         return {
           data: SEA_ICE_EXTENT_SERIES,
-          defaultTitle: 'Arctic vs Antarctic Sea Ice Extent (1979–2024)',
+          defaultTitle: 'Arctic vs Antarctic Sea Ice Extent Record (1979–2024)',
           defaultUnit: 'million km²',
           yAxisLabel: 'Extent (million km²)',
           lines: [
-            { key: 'arcticSeptMin', name: 'Arctic Sept Minimum', color: '#38bdf8', strokeWidth: 2.5 },
+            { key: 'arcticSeptMin', name: 'Arctic Sept Minimum', color: '#52a5d7', strokeWidth: 2.5 },
             { key: 'antarcticSeptMax', name: 'Antarctic Sept Maximum', color: '#818cf8', strokeWidth: 2.5 },
-            { key: 'antarcticFebMin', name: 'Antarctic Feb Minimum', color: '#fb7185', strokeWidth: 2 },
-            { key: 'arcticMarchMax', name: 'Arctic March Maximum', color: '#2dd4bf', strokeWidth: 2 }
+            { key: 'antarcticFebMin', name: 'Antarctic Feb Minimum', color: '#f43f5e', strokeWidth: 2 },
+            { key: 'arcticMarchMax', name: 'Arctic March Maximum', color: '#42c2b1', strokeWidth: 2 }
           ]
         };
       case 'temperature_anomaly':
@@ -69,11 +50,11 @@ export const DataVisualizer: React.FC<DataVisualizerProps> = ({
         return {
           data: POLAR_TEMPERATURE_ANOMALY,
           defaultTitle: 'Arctic & Antarctic vs Global Temperature Anomaly (1900–2024)',
-          defaultUnit: '°C (relative to 1951-1980 base)',
+          defaultUnit: '°C (relative to 1951-1980 baseline)',
           yAxisLabel: 'Anomaly (°C)',
           lines: [
-            { key: 'arcticAnomaly', name: 'Arctic Anomaly (Polar Amplification)', color: '#fbbf24', strokeWidth: 3 },
-            { key: 'antarcticAnomaly', name: 'Antarctic Anomaly', color: '#38bdf8', strokeWidth: 2 },
+            { key: 'arcticAnomaly', name: 'Arctic Anomaly (Polar Amplification)', color: '#f59e0b', strokeWidth: 3 },
+            { key: 'antarcticAnomaly', name: 'Antarctic Anomaly', color: '#52a5d7', strokeWidth: 2 },
             { key: 'globalAnomaly', name: 'Global Mean Anomaly', color: '#94a3b8', strokeWidth: 2 }
           ]
         };
@@ -96,9 +77,9 @@ export const DataVisualizer: React.FC<DataVisualizerProps> = ({
           defaultUnit: '°C / km/h',
           yAxisLabel: 'Value',
           lines: [
-            { key: 'meanTempC', name: 'Annual Mean Temp (°C)', color: '#38bdf8', strokeWidth: 2.5 },
+            { key: 'meanTempC', name: 'Annual Mean Temp (°C)', color: '#52a5d7', strokeWidth: 2.5 },
             { key: 'minTempC', name: 'Record Min Temp (°C)', color: '#6366f1', strokeWidth: 1.5 },
-            { key: 'avgWindKmh', name: 'Avg Wind Speed (km/h)', color: '#2dd4bf', strokeWidth: 2 }
+            { key: 'avgWindKmh', name: 'Avg Wind Speed (km/h)', color: '#42c2b1', strokeWidth: 2 }
           ]
         };
       case 'himalayan_mass_balance':
@@ -109,7 +90,7 @@ export const DataVisualizer: React.FC<DataVisualizerProps> = ({
           yAxisLabel: 'Cumulative Loss (m w.e.)',
           lines: [
             { key: 'cumulativeLossMetersWE', name: 'Cumulative Mass Loss (m w.e.)', color: '#ef4444', strokeWidth: 3 },
-            { key: 'annualBalance', name: 'Annual Balance (m w.e./yr)', color: '#38bdf8', strokeWidth: 2 }
+            { key: 'annualBalance', name: 'Annual Balance (m w.e./yr)', color: '#52a5d7', strokeWidth: 2 }
           ]
         };
       case 'southern_ocean_heat':
@@ -129,12 +110,14 @@ export const DataVisualizer: React.FC<DataVisualizerProps> = ({
           defaultUnit: 'Standard Units',
           yAxisLabel: 'Metric Value',
           lines: [
-            { key: 'arcticSeptMin', name: 'Arctic Sept Minimum', color: '#38bdf8', strokeWidth: 2.5 },
+            { key: 'arcticSeptMin', name: 'Arctic Sept Minimum', color: '#52a5d7', strokeWidth: 2.5 },
             { key: 'antarcticSeptMax', name: 'Antarctic Sept Maximum', color: '#818cf8', strokeWidth: 2.5 }
           ]
         };
     }
   }, [datasetKey]);
+
+  const [exportedCsv, setExportedCsv] = useState(false);
 
   // CSV download function
   const handleDownloadCsv = () => {
@@ -149,90 +132,314 @@ export const DataVisualizer: React.FC<DataVisualizerProps> = ({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setExportedCsv(true);
+    setTimeout(() => setExportedCsv(false), 2200);
   };
 
   const chartTitle = title || defaultTitle;
   const chartUnit = unit || defaultUnit;
 
+  // Chart dimensions & scaling math for SVG
+  const width = 800;
+  const height = compact ? 220 : 320;
+  const padding = { top: 20, right: 30, bottom: 40, left: 50 };
+
+  const chartMath = useMemo(() => {
+    if (!data || data.length === 0) return null;
+
+    let minY = Infinity;
+    let maxY = -Infinity;
+
+    data.forEach((row: any) => {
+      lines.forEach((l) => {
+        const val = row[l.key];
+        if (typeof val === 'number') {
+          if (val < minY) minY = val;
+          if (val > maxY) maxY = val;
+        }
+      });
+    });
+
+    if (minY === maxY) {
+      minY -= 1;
+      maxY += 1;
+    }
+
+    // Add padding to Y bounds
+    const yRange = maxY - minY;
+    minY = minY - yRange * 0.05;
+    maxY = maxY + yRange * 0.05;
+
+    const innerWidth = width - padding.left - padding.right;
+    const innerHeight = height - padding.top - padding.bottom;
+
+    const getX = (index: number) => {
+      if (data.length <= 1) return padding.left;
+      return padding.left + (index / (data.length - 1)) * innerWidth;
+    };
+
+    const getY = (val: number) => {
+      return padding.top + innerHeight - ((val - minY) / (maxY - minY)) * innerHeight;
+    };
+
+    // Build SVG path strings
+    const paths = lines.map((l) => {
+      const linePoints: string[] = [];
+      const areaPoints: string[] = [];
+
+      data.forEach((row: any, i: number) => {
+        const val = row[l.key];
+        if (typeof val === 'number') {
+          const x = getX(i);
+          const y = getY(val);
+          const pt = `${x.toFixed(1)},${y.toFixed(1)}`;
+          linePoints.push(i === 0 ? `M ${pt}` : `L ${pt}`);
+          areaPoints.push(i === 0 ? `M ${pt}` : `L ${pt}`);
+        }
+      });
+
+      const lineD = linePoints.join(' ');
+
+      // Close area path down to baseline
+      const lastX = getX(data.length - 1);
+      const firstX = getX(0);
+      const baseY = getY(Math.max(0, minY));
+      const areaD = `${lineD} L ${lastX.toFixed(1)},${baseY.toFixed(1)} L ${firstX.toFixed(1)},${baseY.toFixed(1)} Z`;
+
+      return { key: l.key, lineD, areaD, color: l.color, strokeWidth: l.strokeWidth };
+    });
+
+    // Generate Y axis ticks
+    const tickCount = 5;
+    const yTicks = Array.from({ length: tickCount }).map((_, i) => {
+      const val = minY + (i / (tickCount - 1)) * (maxY - minY);
+      const y = getY(val);
+      return { val, y };
+    });
+
+    // Generate X axis ticks (subsampled)
+    const xStep = Math.ceil(data.length / 6);
+    const xTicks = data
+      .map((row: any, i: number) => ({ year: row.year, x: getX(i), index: i }))
+      .filter((_, i) => i % xStep === 0 || i === data.length - 1);
+
+    return { getX, getY, paths, yTicks, xTicks, minY, maxY };
+  }, [data, lines, width, height, compact]);
+
+  const activeRow = hoverIndex !== null && data[hoverIndex] ? data[hoverIndex] : null;
+
   return (
-    <div className="w-full bg-polar-900/90 rounded-2xl border border-polar-750 p-4 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
+    <div className="w-full bg-polar-900/90 rounded-2xl border border-polar-800 p-4 sm:p-6 shadow-panel backdrop-blur-xl space-y-4">
       {/* Chart Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-polar-800 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <BarChart2 className="w-4 h-4 text-frost-cyan" />
+            <BarChart2 className="w-4 h-4 text-ice-400" />
             <h3 className="text-sm sm:text-base font-bold text-white font-mono">
               {chartTitle}
             </h3>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
-            <span className="font-semibold text-frost-teal">Unit: {chartUnit}</span>
+          <p className="text-2xs text-slate-400 font-mono mt-1 flex items-center gap-2">
+            <span>Unit: {chartUnit}</span>
             <span>•</span>
-            <span className="flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-frost-teal" />
-              <span>{provenanceOrg}</span>
+            <span className="text-teal-400 flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3" />
+              {provenanceOrg}
             </span>
-          </div>
+          </p>
         </div>
 
-        {/* View Controls & Download */}
-        <div className="flex items-center gap-2">
-          <div className="bg-polar-950 p-1 rounded-xl border border-polar-800 flex items-center gap-1">
+        {/* View mode toggle & CSV export */}
+        <div className="flex items-center gap-2 font-mono text-xs shrink-0">
+          <div className="flex items-center bg-polar-950 p-1 rounded-lg border border-polar-800">
             <button
               onClick={() => setViewMode('line')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                viewMode === 'line' ? 'bg-frost-cyan text-polar-950 shadow-sm' : 'text-slate-400 hover:text-white'
+              className={`px-2.5 py-1 rounded text-2xs font-semibold transition-all ${
+                viewMode === 'line' ? 'bg-ice-500 text-polar-950 font-bold' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Line Chart
+              Line
             </button>
             <button
               onClick={() => setViewMode('area')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                viewMode === 'area' ? 'bg-frost-cyan text-polar-950 shadow-sm' : 'text-slate-400 hover:text-white'
+              className={`px-2.5 py-1 rounded text-2xs font-semibold transition-all ${
+                viewMode === 'area' ? 'bg-ice-500 text-polar-950 font-bold' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Area Chart
+              Area
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                viewMode === 'table' ? 'bg-frost-cyan text-polar-950 shadow-sm' : 'text-slate-400 hover:text-white'
+              className={`px-2.5 py-1 rounded text-2xs font-semibold transition-all ${
+                viewMode === 'table' ? 'bg-ice-500 text-polar-950 font-bold' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Table View
+              Table
             </button>
           </div>
 
           <button
+            type="button"
             onClick={handleDownloadCsv}
-            className="p-2 rounded-xl bg-polar-950 border border-polar-800 text-slate-300 hover:text-frost-cyan hover:border-frost-cyan/40 transition-colors"
+            className={`px-3 py-1.5 rounded-lg border font-mono text-2xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              exportedCsv
+                ? 'bg-emerald-950 border-emerald-400 text-emerald-300 font-bold'
+                : 'bg-polar-950 border-polar-750 hover:border-ice-400 text-slate-300 hover:text-white'
+            }`}
             title="Download CSV dataset"
           >
-            <Download className="w-4 h-4" />
+            <FileSpreadsheet className="w-3.5 h-3.5 text-teal-400" />
+            <span>{exportedCsv ? '✓ CSV Downloaded' : 'CSV'}</span>
           </button>
         </div>
       </div>
 
-      {/* Main Chart Canvas or Table View */}
-      {viewMode === 'table' ? (
-        <div className="overflow-x-auto max-h-80 border border-polar-800 rounded-xl">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-polar-950 text-slate-400 font-semibold border-b border-polar-800 sticky top-0">
+      {/* Chart Legend */}
+      <div className="flex flex-wrap items-center gap-4 text-2xs font-mono text-slate-300 px-1">
+        {lines.map((l) => (
+          <div key={l.key} className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: l.color }} />
+            <span>{l.name}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Chart Canvas / SVG View */}
+      {(viewMode === 'line' || viewMode === 'area') && chartMath && (
+        <div className="relative w-full overflow-hidden rounded-xl bg-polar-950/80 border border-polar-800/80 p-2">
+          <svg
+            viewBox={`0 0 ${width} ${height}`}
+            className="w-full h-auto overflow-visible select-none"
+            onMouseLeave={() => setHoverIndex(null)}
+            onMouseMove={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const mouseX = e.clientX - rect.left;
+              const ratio = Math.max(0, Math.min(1, (mouseX - padding.left) / (width - padding.left - padding.right)));
+              const index = Math.round(ratio * (data.length - 1));
+              setHoverIndex(index);
+            }}
+          >
+            <defs>
+              {lines.map((l) => (
+                <linearGradient key={`grad-${l.key}`} id={`grad-${l.key}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={l.color} stopOpacity="0.35" />
+                  <stop offset="100%" stopColor={l.color} stopOpacity="0.0" />
+                </linearGradient>
+              ))}
+            </defs>
+
+            {/* Gridlines */}
+            {chartMath.yTicks.map((t, idx) => (
+              <g key={idx}>
+                <line
+                  x1={padding.left}
+                  y1={t.y}
+                  x2={width - padding.right}
+                  y2={t.y}
+                  stroke="#1e293b"
+                  strokeDasharray="3 3"
+                />
+                <text
+                  x={padding.left - 8}
+                  y={t.y + 3}
+                  fill="#64748b"
+                  fontSize="10"
+                  fontFamily="monospace"
+                  textAnchor="end"
+                >
+                  {t.val.toFixed(1)}
+                </text>
+              </g>
+            ))}
+
+            {/* X Axis Labels */}
+            {chartMath.xTicks.map((t, idx) => (
+              <text
+                key={idx}
+                x={t.x}
+                y={height - 10}
+                fill="#64748b"
+                fontSize="10"
+                fontFamily="monospace"
+                textAnchor="middle"
+              >
+                {t.year}
+              </text>
+            ))}
+
+            {/* Area Paths */}
+            {viewMode === 'area' &&
+              chartMath.paths.map((p) => (
+                <path key={`area-${p.key}`} d={p.areaD} fill={`url(#grad-${p.key})`} />
+              ))}
+
+            {/* Line Paths */}
+            {chartMath.paths.map((p) => (
+              <path
+                key={`line-${p.key}`}
+                d={p.lineD}
+                fill="none"
+                stroke={p.color}
+                strokeWidth={p.strokeWidth}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            ))}
+
+            {/* Active Hover Crosshair Line */}
+            {hoverIndex !== null && data[hoverIndex] && (
+              <line
+                x1={chartMath.getX(hoverIndex)}
+                y1={padding.top}
+                x2={chartMath.getX(hoverIndex)}
+                y2={height - padding.bottom}
+                stroke="#38bdf8"
+                strokeWidth="1.5"
+                strokeDasharray="2 2"
+              />
+            )}
+          </svg>
+
+          {/* Floating Hover Tooltip */}
+          {activeRow && hoverIndex !== null && (
+            <div className="absolute top-4 right-4 bg-polar-900/95 border border-polar-750 p-3 rounded-xl shadow-panel text-2xs font-mono backdrop-blur-xl space-y-1 z-10">
+              <div className="font-bold text-white border-b border-polar-800 pb-1">
+                Year: {activeRow.year}
+              </div>
+              {lines.map((l) => (
+                <div key={l.key} className="flex items-center justify-between gap-4">
+                  <span style={{ color: l.color }}>{l.name}:</span>
+                  <span className="font-bold text-white">
+                    {activeRow[l.key] !== undefined ? activeRow[l.key] : 'N/A'} {chartUnit}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Table View */}
+      {viewMode === 'table' && (
+        <div className="overflow-x-auto border border-polar-800 rounded-xl max-h-72 font-mono text-xs">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-polar-950 text-slate-400 sticky top-0 border-b border-polar-800">
               <tr>
-                {Object.keys(data[0]).map((k) => (
-                  <th key={k} className="p-3 capitalize">
-                    {k.replace(/([A-Z])/g, ' $1')}
+                <th className="p-3 font-semibold">Year</th>
+                {lines.map((l) => (
+                  <th key={l.key} className="p-3 font-semibold" style={{ color: l.color }}>
+                    {l.name}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-polar-800/60 bg-polar-900/60">
-              {data.map((row, idx) => (
-                <tr key={idx} className="hover:bg-polar-800/40 font-mono">
-                  {Object.values(row).map((val, i) => (
-                    <td key={i} className="p-3">
-                      {val}
+            <tbody className="divide-y divide-polar-850 text-slate-300">
+              {data.map((row: any, i: number) => (
+                <tr key={i} className="hover:bg-polar-850/60 transition-colors">
+                  <td className="p-3 font-bold text-white">{row.year}</td>
+                  {lines.map((l) => (
+                    <td key={l.key} className="p-3">
+                      {row[l.key] !== undefined ? row[l.key] : '—'}
                     </td>
                   ))}
                 </tr>
@@ -240,119 +447,12 @@ export const DataVisualizer: React.FC<DataVisualizerProps> = ({
             </tbody>
           </table>
         </div>
-      ) : (
-        <div className="w-full h-72 sm:h-80 pt-2">
-          <ResponsiveContainer width="100%" height="100%">
-            {viewMode === 'line' ? (
-              <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#173663" opacity={0.5} />
-                <XAxis
-                  dataKey="year"
-                  stroke="#64748b"
-                  fontSize={11}
-                  tickLine={false}
-                  fontFamily="monospace"
-                />
-                <YAxis
-                  stroke="#64748b"
-                  fontSize={11}
-                  tickLine={false}
-                  fontFamily="monospace"
-                  label={{ value: yAxisLabel, angle: -90, position: 'insideLeft', fill: '#94a3b8', fontSize: 10 }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#071326',
-                    borderColor: '#38bdf8',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    color: '#f8fafc',
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
-                  }}
-                  itemStyle={{ color: '#e0f7ff' }}
-                />
-                <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-
-                {/* Specific Reference Line for Ozone Hole (220 DU) */}
-                {datasetKey.includes('ozone') && (
-                  <ReferenceLine
-                    y={220}
-                    label={{ value: '220 DU Ozone Hole Threshold', fill: '#f43f5e', fontSize: 10, position: 'top' }}
-                    stroke="#f43f5e"
-                    strokeDasharray="4 4"
-                  />
-                )}
-
-                {lines.map((line) => (
-                  <Line
-                    key={line.key}
-                    type="monotone"
-                    dataKey={line.key}
-                    name={line.name}
-                    stroke={line.color}
-                    strokeWidth={line.strokeWidth || 2}
-                    dot={{ r: 2, fill: line.color }}
-                    activeDot={{ r: 5 }}
-                  />
-                ))}
-              </LineChart>
-            ) : (
-              <AreaChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-                <defs>
-                  {lines.map((line) => (
-                    <linearGradient key={line.key} id={`grad-${line.key}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={line.color} stopOpacity={0.4} />
-                      <stop offset="95%" stopColor={line.color} stopOpacity={0.0} />
-                    </linearGradient>
-                  ))}
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#173663" opacity={0.5} />
-                <XAxis dataKey="year" stroke="#64748b" fontSize={11} tickLine={false} fontFamily="monospace" />
-                <YAxis stroke="#64748b" fontSize={11} tickLine={false} fontFamily="monospace" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#071326',
-                    borderColor: '#38bdf8',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    color: '#f8fafc'
-                  }}
-                />
-                <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-                {lines.map((line) => (
-                  <Area
-                    key={line.key}
-                    type="monotone"
-                    dataKey={line.key}
-                    name={line.name}
-                    stroke={line.color}
-                    strokeWidth={line.strokeWidth || 2}
-                    fillOpacity={1}
-                    fill={`url(#grad-${line.key})`}
-                  />
-                ))}
-              </AreaChart>
-            )}
-          </ResponsiveContainer>
-        </div>
       )}
 
-      {/* Chart Footer with Provenance */}
-      <div className="pt-2 border-t border-polar-800/80 flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-slate-400 gap-2">
-        <div className="flex items-center gap-1.5">
-          <Info className="w-3.5 h-3.5 text-frost-cyan shrink-0" />
-          <span>Real public scientific measurements. No synthetic or interpolated trends.</span>
-        </div>
-        {doi && (
-          <a
-            href={`https://doi.org/${doi}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-frost-cyan hover:underline font-mono text-[10px]"
-          >
-            DOI: {doi}
-          </a>
-        )}
+      {/* Provenance footer */}
+      <div className="flex items-center justify-between text-3xs font-mono text-slate-500 pt-2 border-t border-polar-800/80">
+        <span>DOI: {doi}</span>
+        <span>Verified Ground-Truth Telemetry Series</span>
       </div>
     </div>
   );

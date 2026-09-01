@@ -7,9 +7,24 @@ import {
   AlertTriangle,
   RotateCcw,
   ChevronRight,
-  BookOpen
+  BookOpen,
+  Brain,
+  Sparkles,
+  Compass,
+  MapPin,
+  FileText,
+  Flag,
+  Trophy,
+  ArrowRight
 } from 'lucide-react';
 import { NavTab } from '../layout/Navbar';
+import { useAudience } from '../../context/AudienceContext';
+import { RESEARCH_STATIONS } from '../../data/stations';
+import { POLAR_DATASETS } from '../../data/datasets';
+import { RESEARCH_PAPERS } from '../../data/researchPapers';
+import { POLAR_SPECIES } from '../../data/biodiversity';
+import { POLAR_EXPEDITIONS } from '../../data/expeditions';
+import { LEARNING_MODULES } from '../../data/learningModules';
 
 interface ChatMessage {
   id: string;
@@ -27,21 +42,24 @@ interface PolarAIProps {
 }
 
 const suggestedPrompts = [
+  'Tell me about penguins',
+  'What is Himansh?',
+  'Tell me about Dakshin Gangotri',
+  'What is glacier mass balance?',
+  'Tell me about Prydz Bay',
   'Why is Antarctica the world\'s largest desert?',
   'How do Maitri and Bharati stations differ?',
-  'What caused the 2023 Antarctic sea ice record low?',
-  'How does India\'s IndARC mooring work in Svalbard?',
-  'What was the Montreal Protocol and is the ozone hole recovering?',
 ];
 
 export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
+  const { isStudent } = useAudience();
   const [inputQuery, setInputQuery] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'welcome',
       sender: 'assistant',
-      text: 'This is a source-grounded polar science assistant. Ask about Antarctic and Arctic climate, Maitri and Bharati stations, sea ice dynamics, ozone recovery, or Himalayan glaciers. Every response is grounded directly in verified datasets and peer-reviewed research.',
+      text: 'Welcome to the Grounded Polar Science AI Assistant. Ask about Antarctic and Arctic climate dynamics, Maitri and Bharati stations, sea ice records, ozone layer chemistry, species, or Himalayan glaciology. Every answer is grounded directly in verified datasets and peer-reviewed research.',
       sourcesUsed: [
         { name: 'NCPOR Polar Archives', org: 'NCPOR India', url: 'https://ncpor.res.in/' },
         { name: 'NSIDC Sea Ice Index', org: 'NSIDC / NASA', url: 'https://nsidc.org/data/g02135' }
@@ -54,6 +72,142 @@ export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Dynamic In-Memory Knowledge Search Fallback
+  const searchGroundedKnowledge = (queryText: string): ChatMessage | null => {
+    const q = queryText.toLowerCase().trim();
+
+    // 1. Search Species (e.g., "penguin", "polar bear", "krill", "seal", "fox")
+    const matchedSpecies = POLAR_SPECIES.find((s) =>
+      s.commonName.toLowerCase().includes(q) ||
+      s.scientificName.toLowerCase().includes(q) ||
+      s.overview.toLowerCase().includes(q) ||
+      q.includes('penguin') && s.commonName.toLowerCase().includes('penguin')
+    );
+
+    if (matchedSpecies) {
+      return {
+        id: `resp-${Date.now()}`,
+        sender: 'assistant',
+        text: `${matchedSpecies.commonName} (${matchedSpecies.scientificName}) is an endemic ${matchedSpecies.region} ${matchedSpecies.group.toLowerCase()} species.`,
+        simpleAnswer: matchedSpecies.overview,
+        scientificExplanation: `Conservation Status: ${matchedSpecies.conservationStatus}. Estimated Population: ${matchedSpecies.estimatedPopulation}. Key Adaptations: ${matchedSpecies.adaptations.join('; ')}. Climate Vulnerability: ${matchedSpecies.climateVulnerability}`,
+        relatedData: [
+          { label: `Explore ${matchedSpecies.commonName} Wildlife 🐧`, tab: 'biodiversity', id: matchedSpecies.id },
+          { label: 'Learn: Marine Ecosystems Module 🎓', tab: 'learn', id: 'learn-polar-biology' }
+        ],
+        sourcesUsed: [
+          { name: matchedSpecies.provenance.sourceOrganization, org: matchedSpecies.provenance.sourceOrgShort, url: matchedSpecies.provenance.originalSourceUrl }
+        ]
+      };
+    }
+
+    // 2. Search Research Stations (e.g., "Himansh", "Dakshin Gangotri", "Maitri", "Bharati", "Himadri", "IndARC")
+    const matchedStation = RESEARCH_STATIONS.find((s) =>
+      s.name.toLowerCase().includes(q) ||
+      s.id.toLowerCase() === q ||
+      (s.nativeName && s.nativeName.toLowerCase().includes(q)) ||
+      (q.includes('dakshin gangotri') && s.historicalSignificance.toLowerCase().includes('dakshin gangotri'))
+    );
+
+    if (matchedStation) {
+      return {
+        id: `resp-${Date.now()}`,
+        sender: 'assistant',
+        text: `${matchedStation.name} is a ${matchedStation.status.toLowerCase()} research station located in ${matchedStation.subRegion} (${matchedStation.region}).`,
+        simpleAnswer: matchedStation.overview,
+        scientificExplanation: `Established in ${matchedStation.establishedYear} at ${matchedStation.elevationMeters}m altitude. Climate: Avg Annual Temp ${matchedStation.climateSummary.avgAnnualTempC}°C (Record Min ${matchedStation.climateSummary.recordMinTempC}°C). Disciplines: ${matchedStation.scientificDisciplines.join(', ')}. ${matchedStation.historicalSignificance}`,
+        relatedData: [
+          { label: `Explore ${matchedStation.name} Station 🗺️`, tab: 'explore', id: matchedStation.id },
+          { label: 'View In-Situ Datasets 📊', tab: 'data', id: matchedStation.connectedDatasetIds[0] },
+          { label: 'India’s Polar Journey 🇮🇳', tab: 'india', id: matchedStation.id }
+        ],
+        sourcesUsed: [
+          { name: matchedStation.provenance.sourceOrganization, org: matchedStation.provenance.sourceOrgShort, url: matchedStation.provenance.originalSourceUrl }
+        ]
+      };
+    }
+
+    // 3. Search Expeditions (e.g., "Dakshin Gangotri", "Qasim", "1981", "Operation Gangotri", "43rd expedition")
+    const matchedExpedition = POLAR_EXPEDITIONS.find((ex) =>
+      ex.name.toLowerCase().includes(q) ||
+      ex.leader.toLowerCase().includes(q) ||
+      ex.overview.toLowerCase().includes(q) ||
+      (q.includes('dakshin gangotri') && ex.name.toLowerCase().includes('dakshin gangotri'))
+    );
+
+    if (matchedExpedition) {
+      return {
+        id: `resp-${Date.now()}`,
+        sender: 'assistant',
+        text: `${matchedExpedition.name} (${matchedExpedition.yearStart}-${matchedExpedition.yearEnd}) led by ${matchedExpedition.leader}.`,
+        simpleAnswer: matchedExpedition.overview,
+        scientificExplanation: `Transport/Vessel: ${matchedExpedition.vesselOrTransport}. Key Achievements: ${matchedExpedition.keyDiscoveries.join('; ')}. Objectives: ${matchedExpedition.objectives.join('; ')}`,
+        relatedData: [
+          { label: 'Explore India’s Polar Journey 🇮🇳', tab: 'india', id: matchedExpedition.connectedStationIds[0] },
+          { label: 'Inspect Expedition Datasets 📊', tab: 'data', id: matchedExpedition.connectedDatasetIds[0] }
+        ],
+        sourcesUsed: [
+          { name: matchedExpedition.provenance.sourceOrganization, org: matchedExpedition.provenance.sourceOrgShort, url: matchedExpedition.provenance.originalSourceUrl }
+        ]
+      };
+    }
+
+    // 4. Search Datasets (e.g., "mass balance", "Prydz Bay", "glacier", "ozone", "CTD", "NetCDF")
+    const matchedDataset = POLAR_DATASETS.find((d) =>
+      d.title.toLowerCase().includes(q) ||
+      d.shortTitle.toLowerCase().includes(q) ||
+      d.description.toLowerCase().includes(q) ||
+      d.studentSummary.toLowerCase().includes(q) ||
+      d.variables.some((v) => v.name.toLowerCase().includes(q) || v.standardName.toLowerCase().includes(q) || v.description.toLowerCase().includes(q)) ||
+      (q.includes('mass balance') && d.id.includes('glaciers')) ||
+      (q.includes('prydz bay') && (d.title.toLowerCase().includes('bharati') || d.title.toLowerCase().includes('prydz')))
+    );
+
+    if (matchedDataset) {
+      return {
+        id: `resp-${Date.now()}`,
+        sender: 'assistant',
+        text: `${matchedDataset.title} — archived dataset by ${matchedDataset.provenance.sourceOrganization}.`,
+        simpleAnswer: matchedDataset.studentSummary,
+        scientificExplanation: `${matchedDataset.description} Measured CF Variables: ${matchedDataset.variables.map(v => `${v.name} (${v.unit})`).join(', ')}. Spatial Bounding: [${matchedDataset.spatialCoverage.boundingBox.join(', ')}]. Resolution: ${matchedDataset.temporalCoverage.resolution}.`,
+        relatedData: [
+          { label: 'Inspect Dataset & Visualization 📊', tab: 'data', id: matchedDataset.id },
+          { label: 'View Supporting Publication 📑', tab: 'research', id: matchedDataset.connectedPaperIds[0] }
+        ],
+        sourcesUsed: [
+          { name: matchedDataset.provenance.sourceOrganization, org: matchedDataset.provenance.sourceOrgShort, url: matchedDataset.provenance.originalSourceUrl, doi: matchedDataset.provenance.doi }
+        ]
+      };
+    }
+
+    // 5. Search Research Papers
+    const matchedPaper = RESEARCH_PAPERS.find((p) =>
+      p.title.toLowerCase().includes(q) ||
+      p.abstract.toLowerCase().includes(q) ||
+      p.journal.toLowerCase().includes(q) ||
+      p.doi.toLowerCase() === q
+    );
+
+    if (matchedPaper) {
+      return {
+        id: `resp-${Date.now()}`,
+        sender: 'assistant',
+        text: `"${matchedPaper.title}" published in ${matchedPaper.journal} (${matchedPaper.year}) by ${matchedPaper.authors.join(', ')}.`,
+        simpleAnswer: `Key Finding: ${matchedPaper.keyFinding}`,
+        scientificExplanation: matchedPaper.abstract,
+        relatedData: [
+          { label: 'View Research Literature 📑', tab: 'research', id: matchedPaper.id },
+          { label: 'Inspect Supporting Dataset 📊', tab: 'data', id: matchedPaper.connectedDatasetIds[0] }
+        ],
+        sourcesUsed: [
+          { name: matchedPaper.provenance.sourceOrganization, org: matchedPaper.provenance.sourceOrgShort, url: matchedPaper.provenance.originalSourceUrl, doi: matchedPaper.doi }
+        ]
+      };
+    }
+
+    return null;
+  };
 
   const handleSendMessage = (queryText?: string) => {
     const textToSend = queryText || inputQuery;
@@ -71,57 +225,26 @@ export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
 
     setTimeout(() => {
       const q = textToSend.toLowerCase();
-      let responseMsg: ChatMessage;
+      let responseMsg: ChatMessage | null = null;
 
+      // Check hardcoded exact prompts first
       if (q.includes('desert') || q.includes('precipitation') || q.includes('dry')) {
         responseMsg = {
           id: `resp-${Date.now()}`,
           sender: 'assistant',
           text: 'Antarctica is officially the largest desert on Earth because deserts are defined strictly by annual precipitation (<250 mm/year). The Antarctic polar plateau receives under 50 mm annually — far less than the Sahara.',
-          simpleAnswer: 'Antarctica is so cold that air cannot hold moisture. Almost no new snow or rain falls in the interior, making it the driest and windiest place on Earth.',
+          simpleAnswer: 'Antarctica is so cold that air cannot hold moisture. Almost no new snow or rain falls in the interior, making it the driest and windiest continent on Earth.',
           scientificExplanation: 'High atmospheric pressure over the South Pole creates a subsidence inversion. At −50°C, the saturation vapor pressure is virtually zero, preventing significant cloud condensation and snowfall.',
           relatedData: [
-            { label: 'Explore South Pole Station', tab: 'explore', id: 'amundsen-scott' },
-            { label: 'Learn: Polar Cryosphere', tab: 'learn', id: 'learn-cryosphere-sea-ice' }
+            { label: 'Explore Amundsen-Scott South Pole Station 🗺️', tab: 'explore', id: 'amundsen-scott' },
+            { label: 'Learn: Polar Cryosphere Module 🎓', tab: 'learn', id: 'learn-cryosphere-sea-ice' }
           ],
           sourcesUsed: [
             { name: 'NSIDC: Parts of the Cryosphere', org: 'NSIDC', url: 'https://nsidc.org/learn/parts-cryosphere/ice-sheets' },
             { name: 'IPCC AR6 Working Group I', org: 'IPCC', url: 'https://www.ipcc.ch/' }
           ]
         };
-      } else if (q.includes('maitri') || q.includes('bharati') || q.includes('indian station')) {
-        responseMsg = {
-          id: `resp-${Date.now()}`,
-          sender: 'assistant',
-          text: 'India operates two year-round Antarctic research stations: Maitri (established 1989, Schirmacher Oasis, 70°S) and Bharati (established 2012, Larsemann Hills, 69°S).',
-          simpleAnswer: 'Maitri sits inland on rocky hills near freshwater Lake Priyadarshini and monitors weather and geomagnetism. Bharati is a coastal station with satellite dishes that download data from ISRO satellites on every polar pass.',
-          scientificExplanation: 'Maitri focuses on 34-year synoptic surface meteorology, crustal deformation GPS, and limnology. Bharati specializes in Gondwana supercontinent correlation, aerosol optical depth, and real-time remote sensing telemetry for ISRO earth observation satellites.',
-          relatedData: [
-            { label: 'Maitri Meteorological Time Series', tab: 'data', id: 'ncpor-maitri-met-daily' },
-            { label: 'India\'s Polar Journey', tab: 'india', id: 'maitri' }
-          ],
-          sourcesUsed: [
-            { name: 'Maitri 30-Year Climate Trends', org: 'NCPOR / Polar Science', url: 'https://doi.org/10.1016/j.polar.2021.100684', doi: '10.1016/j.polar.2021.100684' },
-            { name: 'NCPOR Station Architecture Dossier', org: 'NCPOR', url: 'https://ncpor.res.in/antarctis/bharati' }
-          ]
-        };
-      } else if (q.includes('indarc') || q.includes('svalbard') || q.includes('himadri') || q.includes('fjord')) {
-        responseMsg = {
-          id: `resp-${Date.now()}`,
-          sender: 'assistant',
-          text: 'IndARC is India\'s subsurface moored ocean observatory deployed in Kongsfjorden, Svalbard at 192 meters depth, complemented by the Himadri research station in Ny-Ålesund.',
-          simpleAnswer: 'An underwater robotic anchor packed with sensors sits near the Arctic seafloor all year, recording water temperature and salinity even during the pitch-black polar winter under thick ice.',
-          scientificExplanation: 'IndARC measures seasonal Atlantic Water (AW) intrusion into the High Arctic. Acoustic Doppler Current Profilers (ADCP) and CTD microCATs document how warm saline water disrupts fjord stratification and teleconnects with the Indian Summer Monsoon.',
-          relatedData: [
-            { label: 'IndARC CTD Time Series', tab: 'data', id: 'ncpor-himadri-kongsfjorden-ctd' },
-            { label: 'Himadri Research Station', tab: 'explore', id: 'himadri' }
-          ],
-          sourcesUsed: [
-            { name: 'Kongsfjorden Moored Oceanographic Physics', org: 'Deep Sea Research / NCPOR', url: 'https://doi.org/10.1016/j.dsr.2019.103130', doi: '10.1016/j.dsr.2019.103130' },
-            { name: 'Svalbard Science Forum Portal', org: 'SSF / Kings Bay', url: 'https://research-in-svalbard.net/' }
-          ]
-        };
-      } else if (q.includes('2023') || q.includes('sea ice') || q.includes('record low') || q.includes('nsidc')) {
+      } else if (q.includes('2023') && (q.includes('sea ice') || q.includes('record low'))) {
         responseMsg = {
           id: `resp-${Date.now()}`,
           sender: 'assistant',
@@ -129,38 +252,36 @@ export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
           simpleAnswer: 'Scientists found that warmer ocean water stored 200 meters below the surface mixed upward, preventing the ocean surface from freezing during the Antarctic winter.',
           scientificExplanation: 'Argo profiling floats and atmospheric reanalyses demonstrated that subsurface warming in the Southern Ocean upper pycnocline, paired with strong circumpolar westerlies, precluded normal sea ice consolidation.',
           relatedData: [
-            { label: 'NSIDC Sea Ice Index', tab: 'data', id: 'nsidc-sea-ice-index' },
-            { label: 'Data Story: Tale of Two Poles', tab: 'stories', id: 'sea-ice-dynamics-two-poles' }
+            { label: 'NSIDC Sea Ice Index 📊', tab: 'data', id: 'nsidc-sea-ice-index' },
+            { label: 'Data Story: Tale of Two Poles 📖', tab: 'stories', id: 'sea-ice-dynamics-two-poles' }
           ],
           sourcesUsed: [
             { name: 'Record Low Antarctic Sea Ice Cover in 2023', org: 'Communications Earth & Environment', url: 'https://doi.org/10.1038/s43247-023-00961-9', doi: '10.1038/s43247-023-00961-9' },
             { name: 'NSIDC Sea Ice Index Version 3', org: 'NSIDC / NOAA', url: 'https://nsidc.org/data/g02135' }
           ]
         };
-      } else if (q.includes('ozone') || q.includes('montreal') || q.includes('halley') || q.includes('cfc')) {
+      }
+
+      // If no static match, execute dynamic grounded knowledge search
+      if (!responseMsg) {
+        responseMsg = searchGroundedKnowledge(textToSend);
+      }
+
+      // Helpful Fallback for Zero Matches
+      if (!responseMsg) {
         responseMsg = {
           id: `resp-${Date.now()}`,
           sender: 'assistant',
-          text: 'The Antarctic Ozone Hole was discovered in 1985 by British Antarctic Survey scientists at Halley Station. The 1987 Montreal Protocol banned ozone-depleting CFCs, and the ozone layer is now on track for full recovery by ~2066.',
-          simpleAnswer: 'Chemicals from old spray cans destroyed Earth\'s natural UV shield over Antarctica. Thanks to an international global ban, the hole has stopped growing and is slowly healing.',
-          scientificExplanation: 'Heterogeneous reactions on Polar Stratospheric Clouds (PSCs) convert stable chlorine reservoirs (HCl, ClONO₂) into reactive free radicals. Spring sunrise triggers catalytic cycles where one chlorine atom destroys 100,000 ozone molecules.',
-          relatedData: [
-            { label: 'Antarctic Total Column Ozone Series', tab: 'data', id: 'bas-halley-ozone-column' },
-            { label: 'Data Story: Healing the Sky', tab: 'stories', id: 'healing-the-antarctic-ozone-hole' }
-          ],
-          sourcesUsed: [
-            { name: 'Large Losses of Total Ozone in Antarctica', org: 'Nature / BAS', url: 'https://doi.org/10.1038/315207a0', doi: '10.1038/315207a0' },
-            { name: 'NASA Ozone Watch Annual Summary', org: 'NASA GSFC', url: 'https://ozonewatch.gsfc.nasa.gov/' }
-          ]
-        };
-      } else {
-        responseMsg = {
-          id: `resp-${Date.now()}`,
-          sender: 'assistant',
-          text: `Regarding "${textToSend}": A retrieval was conducted across connected polar repositories (NCPOR, NSIDC, NASA, BAS, SCAR). While general information exists, a specific peer-reviewed measurement or DOI for that exact query could not be verified within the connected polar indices.`,
-          simpleAnswer: 'To ensure scientific integrity, PolarVerse does not produce unverified claims.',
-          scientificExplanation: 'Try asking about Antarctic sea ice, Maitri/Bharati stations, IndARC in Kongsfjorden, ozone hole chemistry, or Himalayan glacier mass balance.',
+          text: `I couldn't find a verified match for "${textToSend}" in the current PolarVerse knowledge base.`,
+          simpleAnswer: 'To maintain strict scientific credibility, PolarVerse does not generate unverified claims.',
+          scientificExplanation: 'Try asking about Antarctic sea ice, Maitri/Bharati/Himadri stations, IndARC mooring in Kongsfjorden, ozone hole chemistry, penguins, Himansh, or Himalayan glacier mass balance.',
           isUngrounded: true,
+          relatedData: [
+            { label: 'Search Stations 🗺️', tab: 'explore' },
+            { label: 'Browse Datasets 📊', tab: 'data' },
+            { label: 'Explore Research 📑', tab: 'research' },
+            { label: 'View Learning Modules 🎓', tab: 'learn' }
+          ],
           sourcesUsed: [
             { name: 'NCPOR National Polar Data Centre', org: 'NCPOR', url: 'https://npdc.ncpor.res.in/' },
             { name: 'NSIDC Polar Knowledge Portal', org: 'NSIDC', url: 'https://nsidc.org/' }
@@ -168,212 +289,208 @@ export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
         };
       }
 
-      setMessages((prev) => [...prev, responseMsg]);
+      setMessages((prev) => [...prev, responseMsg!]);
       setIsProcessing(false);
-    }, 600);
+    }, 450);
   };
 
   return (
-    <div className="w-full min-h-screen bg-polar-950 text-slate-100">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+    <div className="w-full min-h-screen bg-polar-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto space-y-8">
 
         {/* Page header */}
-        <div className="border-b border-ink-700 pb-8">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-5 h-px bg-ice-400" aria-hidden="true" />
-            <span className="text-2xs font-medium tracking-widest uppercase text-ice-400">
-              Source-Grounded Scientific Assistant
+        <div className="border-b border-polar-800 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-md bg-polar-900 border border-ice-500/30 text-ice-300 text-2xs font-mono mb-3">
+              <Brain className="w-3.5 h-3.5" />
+              <span className="uppercase tracking-wider font-semibold">Grounded AI Research Assistant</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+              Polar Science Assistant
+            </h1>
+            <p className="text-sm text-slate-300 max-w-2xl mt-2 leading-relaxed">
+              Retrieval-augmented educational assistant grounded in peer-reviewed literature, NCPOR records, and satellite indices. Every answer cites verified DOIs.
+            </p>
+          </div>
+
+          <div className="px-3.5 py-2 rounded-xl bg-polar-900 border border-polar-800 text-2xs font-mono flex items-center gap-2 shrink-0">
+            <span className="text-slate-400 uppercase">Active Mode:</span>
+            <span className={`font-bold ${isStudent ? 'text-amber-300' : 'text-teal-300'}`}>
+              {isStudent ? 'Student Mode 🎓' : 'Researcher Mode 🔬'}
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-semibold text-white mb-2">
-            Polar Science Assistant
-          </h1>
-          <p className="text-sm text-slate-400 max-w-2xl">
-            Retrieval-augmented educational AI connected exclusively to authoritative polar datasets, 
-            research papers, and station records. All responses cite original sources.
-          </p>
         </div>
 
-        {/* Suggested prompts — text links, not pills */}
-        <div className="space-y-1">
-          <div className="text-2xs font-medium uppercase tracking-widest text-slate-500 mb-2">
-            Suggested queries
+        {/* Suggested prompts */}
+        <div className="space-y-3">
+          <div className="text-2xs font-mono font-semibold uppercase tracking-widest text-slate-400">
+            Suggested Research Questions
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-            {suggestedPrompts.map((prompt, i) => (
+          <div className="flex flex-wrap gap-2">
+            {suggestedPrompts.map((prompt, idx) => (
               <button
-                key={i}
+                key={idx}
                 onClick={() => handleSendMessage(prompt)}
-                className="text-left text-xs text-slate-400 hover:text-white px-3 py-2 border border-transparent hover:border-ink-700 rounded-md transition-colors flex items-center gap-2 group"
+                className="px-3.5 py-2 rounded-xl bg-polar-900/80 hover:bg-polar-850 border border-polar-800 hover:border-ice-500/40 text-xs font-mono text-slate-300 hover:text-white transition-all cursor-pointer text-left"
               >
-                <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-ice-400 shrink-0 transition-colors" aria-hidden="true" />
                 {prompt}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Conversation — document-style, not bubble chat */}
-        <div className="space-y-0 border border-ink-700 rounded-lg overflow-hidden">
-          <div className="divide-y divide-ink-700 max-h-[600px] overflow-y-auto">
-            {messages.map((msg) => {
-              const isUser = msg.sender === 'user';
-
-              if (isUser) {
-                return (
-                  <div key={msg.id} className="px-6 py-5 bg-ink-800 flex items-start gap-4">
-                    <div className="text-2xs font-semibold uppercase tracking-widest text-slate-500 w-16 shrink-0 pt-0.5">
-                      You
-                    </div>
-                    <p className="text-sm text-slate-200 leading-relaxed">{msg.text}</p>
-                  </div>
-                );
-              }
-
-              return (
-                <div key={msg.id} className="px-6 py-6 space-y-5">
-                  {/* Response label */}
-                  <div className="flex items-center gap-2">
-                    <div className="text-2xs font-semibold uppercase tracking-widest text-ice-400">
-                      Polar Science Assistant
-                    </div>
-                    <div className="flex items-center gap-1 text-2xs text-slate-500">
-                      <ShieldCheck className="w-3 h-3 text-teal-400" aria-hidden="true" />
-                      Source-grounded
-                    </div>
-                  </div>
-
-                  {/* Main answer */}
-                  {msg.isUngrounded && (
-                    <div className="flex items-start gap-2 p-3 border border-amber-600/30 bg-amber-600/10 rounded-md">
-                      <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" aria-hidden="true" />
-                      <span className="text-xs text-amber-400">Query outside verified polar knowledge base</span>
-                    </div>
+        {/* Chat Messages */}
+        <div className="space-y-4">
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`p-5 sm:p-6 rounded-2xl border transition-all ${
+                msg.sender === 'user'
+                  ? 'bg-polar-850 border-ice-500/30 text-white ml-6 sm:ml-12'
+                  : 'bg-polar-900/90 border-polar-800 text-slate-200 backdrop-blur-xl shadow-panel'
+              }`}
+            >
+              <div className="flex items-center justify-between border-b border-polar-800/80 pb-3 mb-4">
+                <div className="flex items-center gap-2 font-mono text-xs">
+                  {msg.sender === 'assistant' ? (
+                    <>
+                      <Sparkles className="w-4 h-4 text-ice-400" />
+                      <span className="font-bold text-white">PolarVerse Science Assistant</span>
+                      {msg.isUngrounded ? (
+                        <span className="px-2 py-0.5 rounded text-3xs font-mono bg-rose-500/20 text-rose-300 border border-rose-400/30">
+                          Unverified Query
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded text-3xs font-mono bg-teal-500/20 text-teal-300 border border-teal-400/30 flex items-center gap-1">
+                          <ShieldCheck className="w-3 h-3" />
+                          Grounded Response
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="font-bold text-ice-300">You</span>
                   )}
+                </div>
+              </div>
 
-                  <p className="text-sm text-slate-200 leading-relaxed">{msg.text}</p>
+              <p className="text-sm leading-relaxed text-slate-200 font-sans">{msg.text}</p>
 
-                  {/* Simple explanation */}
-                  {msg.simpleAnswer && (
-                    <div className="border-l-2 border-ice-500 pl-4 space-y-1">
-                      <div className="text-2xs font-semibold uppercase tracking-widest text-slate-500">
-                        Plain Language
+              {/* AUDIENCE-AWARE PRESENTATION */}
+              {msg.sender === 'assistant' && (
+                <div className="mt-4 space-y-4">
+                  {/* Student Mode 🎓 Emphasis */}
+                  {isStudent && msg.simpleAnswer && (
+                    <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1.5 font-sans">
+                      <div className="text-2xs font-mono font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+                        <span>🎓 Student Summary & Analogy:</span>
                       </div>
-                      <p className="text-sm text-slate-400 leading-relaxed">{msg.simpleAnswer}</p>
+                      <p className="text-xs text-slate-200 leading-relaxed">{msg.simpleAnswer}</p>
                     </div>
                   )}
 
-                  {/* Scientific explanation */}
+                  {/* Scientific Detail (Researcher Emphasis or Student Expandable) */}
                   {msg.scientificExplanation && (
-                    <div className="border-l-2 border-teal-500 pl-4 space-y-1">
-                      <div className="text-2xs font-semibold uppercase tracking-widest text-slate-500">
-                        Scientific Detail
+                    <div className={`p-4 rounded-xl border font-mono text-xs space-y-1.5 ${
+                      !isStudent
+                        ? 'bg-teal-950/40 border-teal-500/30 text-teal-100'
+                        : 'bg-polar-950 border-polar-800 text-slate-300'
+                    }`}>
+                      <div className="text-2xs font-bold uppercase tracking-wider text-teal-300 flex items-center gap-1.5">
+                        <span>🔬 Quantitative Scientific Explanation:</span>
                       </div>
-                      <p className="text-sm text-slate-400 leading-relaxed">{msg.scientificExplanation}</p>
+                      <p className="text-xs leading-relaxed">{msg.scientificExplanation}</p>
                     </div>
                   )}
 
-                  {/* Related data links */}
+                  {/* Student Mode Backup if simpleAnswer wasn't available */}
+                  {!isStudent && msg.simpleAnswer && (
+                    <div className="p-3 rounded-lg bg-polar-950 border border-polar-800 text-2xs font-mono text-slate-400">
+                      <span className="font-bold text-slate-300">Plain Language Overview: </span>
+                      {msg.simpleAnswer}
+                    </div>
+                  )}
+
+                  {/* Entity Navigation Buttons */}
                   {msg.relatedData && msg.relatedData.length > 0 && (
-                    <div className="space-y-1">
-                      <div className="text-2xs font-semibold uppercase tracking-widest text-slate-500">
-                        Related Resources
+                    <div className="pt-3 border-t border-polar-800 space-y-2">
+                      <div className="text-3xs font-mono uppercase tracking-widest text-slate-400 font-semibold">
+                        Related PolarVerse Knowledge:
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {msg.relatedData.map((d, idx) => (
+                        {msg.relatedData.map((item, idx) => (
                           <button
                             key={idx}
-                            onClick={() => onNavigate(d.tab, d.id)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-ink-700 hover:border-ice-500 text-xs text-slate-400 hover:text-white rounded-md transition-colors"
+                            onClick={() => onNavigate(item.tab, item.id)}
+                            className="px-3.5 py-2 rounded-xl bg-ice-500 hover:bg-ice-400 active:scale-[0.98] text-polar-950 font-bold text-xs font-mono transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
                           >
-                            <Database className="w-3 h-3" aria-hidden="true" />
-                            {d.label}
+                            <span>{item.label}</span>
+                            <ArrowRight className="w-3 h-3" />
                           </button>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Sources */}
+                  {/* Sources & Provenance */}
                   {msg.sourcesUsed && msg.sourcesUsed.length > 0 && (
-                    <div className="pt-4 border-t border-ink-700 space-y-2">
-                      <div className="flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-widest text-slate-500">
-                        <ShieldCheck className="w-3 h-3 text-teal-400" aria-hidden="true" />
-                        Sources used for this answer
+                    <div className="pt-3 border-t border-polar-800/60 space-y-2 font-mono text-2xs">
+                      <div className="text-3xs uppercase tracking-widest text-slate-400 font-semibold flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3 text-teal-400" />
+                        <span>Sources & Grounded Provenance:</span>
                       </div>
-                      <div className="space-y-1.5">
+                      <div className="flex flex-wrap gap-2">
                         {msg.sourcesUsed.map((src, idx) => (
-                          <div key={idx} className="flex items-start justify-between gap-4">
-                            <div>
-                              <span className="text-xs text-slate-400">{src.name}</span>
-                              <span className="text-2xs text-slate-600 ml-2">({src.org})</span>
-                            </div>
-                            <a
-                              href={src.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-2xs text-ice-400 hover:underline font-mono whitespace-nowrap shrink-0"
-                              aria-label={`Verify source: ${src.name}`}
-                            >
-                              {src.doi ? src.doi : 'Verify source'}
-                              <ExternalLink className="w-2.5 h-2.5" aria-hidden="true" />
-                            </a>
-                          </div>
+                          <a
+                            key={idx}
+                            href={src.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-2.5 py-1 rounded bg-polar-950 hover:bg-polar-850 border border-polar-800 text-slate-300 hover:text-white transition-colors flex items-center gap-1.5"
+                          >
+                            <span>{src.name} ({src.org})</span>
+                            {src.doi && <span className="text-teal-400 text-3xs">DOI:{src.doi}</span>}
+                            <ExternalLink className="w-3 h-3 text-ice-400" />
+                          </a>
                         ))}
                       </div>
                     </div>
                   )}
                 </div>
-              );
-            })}
-
-            {/* Processing state */}
-            {isProcessing && (
-              <div className="px-6 py-5 space-y-2">
-                <div className="text-2xs font-semibold uppercase tracking-widest text-ice-400">
-                  Polar Science Assistant
-                </div>
-                <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <div className="flex gap-0.5">
-                    <span className="w-1.5 h-1.5 bg-ice-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-1.5 h-1.5 bg-ice-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-1.5 h-1.5 bg-ice-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                  Searching verified polar knowledge base...
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input bar — minimal, functional */}
-          <div className="border-t border-ink-700 bg-ink-800 p-4">
-            <div className="flex items-center gap-3">
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputQuery}
-                onChange={(e) => setInputQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Ask about Antarctic stations, sea ice, ozone, Arctic biology..."
-                className="flex-1 px-4 py-2.5 bg-polar-950 border border-ink-700 focus:border-ice-500 text-sm text-slate-200 placeholder:text-slate-600 rounded-md outline-none transition-colors"
-                aria-label="Ask a question about polar science"
-              />
-              <button
-                onClick={() => handleSendMessage()}
-                disabled={!inputQuery.trim() || isProcessing}
-                className="p-2.5 bg-ice-500 hover:bg-ice-400 disabled:opacity-40 disabled:cursor-not-allowed text-polar-950 rounded-md transition-colors"
-                aria-label="Send question"
-              >
-                <Send className="w-4 h-4" aria-hidden="true" />
-              </button>
+              )}
             </div>
-            <p className="text-2xs text-slate-600 mt-2 px-1">
-              All answers are grounded in verified datasets and peer-reviewed research. 
-              PolarVerse does not generate unverified scientific claims.
-            </p>
-          </div>
+          ))}
+
+          {isProcessing && (
+            <div className="p-5 rounded-2xl bg-polar-900 border border-polar-800 flex items-center gap-3 text-xs font-mono text-ice-300">
+              <Sparkles className="w-4 h-4 animate-spin" />
+              <span>Querying NCPOR, NSIDC, and SCAR grounded indices...</span>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
         </div>
+
+        {/* Input Bar */}
+        <div className="sticky bottom-6 bg-polar-900/90 border border-polar-800 p-3 rounded-2xl backdrop-blur-xl shadow-elevated flex items-center gap-3">
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputQuery}
+            onChange={(e) => setInputQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+            placeholder="Ask about Antarctic sea ice, penguins, Himansh, Maitri, or glacier mass balance..."
+            className="flex-1 bg-transparent px-3 text-xs font-mono text-white placeholder:text-slate-500 focus:outline-none"
+          />
+          <button
+            onClick={() => handleSendMessage()}
+            disabled={!inputQuery.trim() || isProcessing}
+            className="px-4 py-2.5 bg-ice-500 hover:bg-ice-400 disabled:opacity-50 text-polar-950 font-bold text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>Ask AI</span>
+            <Send className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
       </div>
     </div>
   );

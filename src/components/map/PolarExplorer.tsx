@@ -95,63 +95,75 @@ export const PolarExplorer: React.FC<PolarExplorerProps> = ({ onNavigate, initia
   return (
     <div className="w-full min-h-screen bg-polar-950 text-slate-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Title & Provenance Indicator */}
+        {/* Immersive Header Title */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-polar-800 pb-6">
           <div>
-            <div className="flex items-center gap-2 text-frost-cyan text-xs font-bold uppercase tracking-wider mb-1">
-              <Compass className="w-4 h-4" />
-              <span>Interactive Geographic Interoperability Layer</span>
+            <div className="flex items-center gap-2 text-ice-400 text-xs font-mono font-bold uppercase tracking-widest mb-1">
+              <Compass className="w-4 h-4 text-ice-400" />
+              <span>EXPLORE THE POLAR WORLD</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">
-              🗺️ Polar Explorer & Research Stations
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Polar Explorer & Observatories
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl">
-              Accurate, verified polar stereographic cartography connecting Indian and international permanent stations, observatories, and expeditions across the Antarctic continent and Arctic basin.
+            <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
+              Discover the research stations observing Earth's most extreme environments across Antarctic ice sheets, Svalbard Arctic observatories, and the High Himalayas.
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Region / Projection Selector Pills */}
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => {
                 setProjection('antarctic');
                 setSelectedRegionFilter('all');
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                 projection === 'antarctic'
-                  ? 'bg-frost-cyan text-polar-950 shadow-polar-glow'
-                  : 'bg-polar-900 text-slate-300 hover:bg-polar-800 border border-polar-750'
+                  ? 'bg-ice-500 text-polar-950 shadow-sm font-bold'
+                  : 'bg-polar-900 text-slate-300 hover:bg-polar-850 border border-polar-750'
               }`}
             >
-              🇦🇶 Antarctic View (EPSG:3031)
+              🇦🇶 Antarctic (EPSG:3031)
             </button>
             <button
               onClick={() => {
                 setProjection('arctic');
                 setSelectedRegionFilter('all');
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                 projection === 'arctic'
-                  ? 'bg-frost-cyan text-polar-950 shadow-polar-glow'
-                  : 'bg-polar-900 text-slate-300 hover:bg-polar-800 border border-polar-750'
+                  ? 'bg-ice-500 text-polar-950 shadow-sm font-bold'
+                  : 'bg-polar-900 text-slate-300 hover:bg-polar-850 border border-polar-750'
               }`}
             >
-              🧊 Arctic View (EPSG:3575)
+              🧊 Arctic (EPSG:3575)
             </button>
             <button
               onClick={() => {
                 setProjection('global');
                 setSelectedRegionFilter('all');
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                 projection === 'global'
-                  ? 'bg-frost-cyan text-polar-950 shadow-polar-glow'
-                  : 'bg-polar-900 text-slate-300 hover:bg-polar-800 border border-polar-750'
+                  ? 'bg-ice-500 text-polar-950 shadow-sm font-bold'
+                  : 'bg-polar-900 text-slate-300 hover:bg-polar-850 border border-polar-750'
               }`}
             >
               🌐 Global Network
             </button>
           </div>
         </div>
+
+        {/* Unobtrusive Discovery Guidance Badge */}
+        {!selectedStation && (
+          <div className="bg-polar-900/90 border border-ice-500/30 text-ice-300 px-4 py-2.5 rounded-xl text-xs font-mono flex items-center justify-between shadow-sm animate-in fade-in duration-200">
+            <div className="flex items-center gap-2">
+              <Info className="w-4 h-4 text-ice-400 shrink-0" />
+              <span>Select any station marker on the map to open its scientific expedition profile.</span>
+            </div>
+            <span className="text-2xs text-slate-400">{filteredStations.length} visible</span>
+          </div>
+        )}
 
         {/* Filter Controls Bar */}
         <div className="p-4 rounded-2xl bg-polar-900/90 border border-polar-800 flex flex-wrap items-center justify-between gap-4 backdrop-blur-md">
@@ -352,19 +364,17 @@ export const PolarExplorer: React.FC<PolarExplorerProps> = ({ onNavigate, initia
                     onMouseEnter={() => setHoveredStation(station)}
                     onMouseLeave={() => setHoveredStation(null)}
                   >
-                    {/* Glowing Pulse Ring for Indian Stations */}
-                    {station.isIndianStation && (
-                      <circle
-                        cx={x}
-                        cy={y}
-                        r={isHovered || isSelected ? 16 : 11}
-                        fill="none"
-                        stroke="#f97316"
-                        strokeWidth="2"
-                        opacity="0.8"
-                        className="animate-ping"
-                      />
-                    )}
+                    {/* Restrained Scientific Radar Beacon Pulse Ring */}
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r={isHovered || isSelected ? 16 : 11}
+                      fill="none"
+                      stroke={station.isIndianStation ? '#f97316' : isSelected ? '#38bdf8' : '#52a5d7'}
+                      strokeWidth="1.5"
+                      opacity={isSelected ? '0.9' : isHovered ? '0.8' : '0.4'}
+                      className={station.isIndianStation ? 'animate-ping' : 'animate-pulse-subtle'}
+                    />
 
                     {/* Outer Target Ring */}
                     <circle

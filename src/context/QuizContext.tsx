@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import confetti from 'canvas-confetti';
 import { POLAR_BADGES } from '../data/quizzes';
 
 interface QuizProgressState {
@@ -34,6 +33,22 @@ const DEFAULT_STATE: QuizProgressState = {
   correctQuestionIds: [],
   unlockedBadgeIds: [],
   topicMastery: {},
+};
+
+const triggerConfetti = () => {
+  try {
+    const win = window as any;
+    if (typeof win.confetti === 'function') {
+      win.confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#38bdf8', '#2dd4bf', '#88d5f7', '#fbbf24']
+      });
+    }
+  } catch (e) {
+    // Ignore optional visual particle burst
+  }
 };
 
 const QuizContext = createContext<QuizContextType | undefined>(undefined);
@@ -79,15 +94,7 @@ export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const newBadges = [...prev.unlockedBadgeIds];
       if (badgeRewardId && isCorrect && !newBadges.includes(badgeRewardId)) {
         newBadges.push(badgeRewardId);
-        // Trigger celebratory confetti
-        try {
-          confetti({
-            particleCount: 80,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#38bdf8', '#2dd4bf', '#88d5f7', '#fbbf24']
-          });
-        } catch (e) {}
+        triggerConfetti();
       }
 
       return {

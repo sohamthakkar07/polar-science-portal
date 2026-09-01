@@ -5,6 +5,7 @@ import { ProvenanceBadge } from '../layout/ProvenanceBadge';
 import { POLAR_DATASETS } from '../../data/datasets';
 import { RESEARCH_PAPERS } from '../../data/researchPapers';
 import { NavTab } from '../layout/Navbar';
+import { useAudience } from '../../context/AudienceContext';
 
 interface StationDetailDrawerProps {
   station: ResearchStation | null;
@@ -13,6 +14,7 @@ interface StationDetailDrawerProps {
 }
 
 export const StationDetailDrawer: React.FC<StationDetailDrawerProps> = ({ station, onClose, onNavigate }) => {
+  const { isStudent } = useAudience();
   if (!station) return null;
 
   const connectedDatasets = POLAR_DATASETS.filter((d) => station.connectedDatasetIds.includes(d.id));
@@ -31,7 +33,7 @@ export const StationDetailDrawer: React.FC<StationDetailDrawerProps> = ({ statio
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full bg-polar-950/80 text-slate-300 hover:text-white border border-polar-700 shadow-md backdrop-blur-md"
+          className="absolute top-4 right-4 p-2 rounded-full bg-polar-950/80 text-slate-300 hover:text-white border border-polar-700 shadow-md backdrop-blur-md cursor-pointer"
           aria-label="Close station drawer"
         >
           <X className="w-5 h-5" />
@@ -40,7 +42,7 @@ export const StationDetailDrawer: React.FC<StationDetailDrawerProps> = ({ statio
         <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-frost-cyan/20 border border-frost-cyan/50 text-frost-cyan">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-ice-500/20 border border-ice-400/50 text-ice-300">
                 {station.region}
               </span>
               {station.isIndianStation && (
@@ -52,14 +54,14 @@ export const StationDetailDrawer: React.FC<StationDetailDrawerProps> = ({ statio
                 Est. {station.establishedYear}
               </span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-semibold text-white flex items-center gap-2">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white font-sans flex items-center gap-2">
               {station.name}
               {station.nativeName && (
                 <span className="text-lg font-normal text-slate-300">({station.nativeName})</span>
               )}
             </h2>
             <p className="text-xs text-slate-300 flex items-center gap-1.5 mt-1">
-              <MapPin className="w-3.5 h-3.5 text-frost-cyan" />
+              <MapPin className="w-3.5 h-3.5 text-ice-400" />
               <span>{station.subRegion}</span>
             </p>
           </div>
@@ -72,7 +74,7 @@ export const StationDetailDrawer: React.FC<StationDetailDrawerProps> = ({ statio
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="p-3 rounded-xl bg-polar-900/80 border border-polar-800">
             <div className="text-[10px] text-slate-400 uppercase font-semibold flex items-center gap-1">
-              <Compass className="w-3 h-3 text-frost-cyan" /> Coordinates
+              <Compass className="w-3 h-3 text-ice-400" /> Coordinates
             </div>
             <div className="text-xs font-bold text-white font-mono mt-1">
               {Math.abs(station.latitude).toFixed(2)}°{station.latitude < 0 ? 'S' : 'N'}, {Math.abs(station.longitude).toFixed(2)}°{station.longitude < 0 ? 'W' : 'E'}
@@ -97,7 +99,7 @@ export const StationDetailDrawer: React.FC<StationDetailDrawerProps> = ({ statio
             <div className="text-xs font-bold text-white font-mono mt-1">
               {station.climateSummary.avgWindSpeedKmh} km/h
             </div>
-            <div className="text-[10px] text-slate-500">Katabatic winds</div>
+            <div className="text-[10px] text-slate-500">In-situ observations</div>
           </div>
 
           <div className="p-3 rounded-xl bg-polar-900/80 border border-polar-800">
@@ -107,13 +109,13 @@ export const StationDetailDrawer: React.FC<StationDetailDrawerProps> = ({ statio
             <div className="text-xs font-bold text-white font-mono mt-1">
               {station.crewCapacityWinter} (Winter) / {station.crewCapacitySummer} (Summer)
             </div>
-            <div className="text-[10px] text-slate-500">{station.status}</div>
+            <div className="text-[10px] text-slate-500 truncate">{station.status}</div>
           </div>
         </div>
 
         {/* Overview */}
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Station Overview</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Station Profile & Mission</h3>
           <p className="text-xs text-slate-300 leading-relaxed bg-polar-900/60 p-4 rounded-xl border border-polar-800/80">
             {station.overview}
           </p>
@@ -121,12 +123,12 @@ export const StationDetailDrawer: React.FC<StationDetailDrawerProps> = ({ statio
 
         {/* Scientific Disciplines */}
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Scientific Disciplines</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Research Thrusts</h3>
           <div className="flex flex-wrap gap-2">
             {station.scientificDisciplines.map((discipline, idx) => (
               <span
                 key={idx}
-                className="px-3 py-1 rounded-lg text-xs font-medium bg-polar-850 border border-polar-750 text-slate-200"
+                className="px-3 py-1 rounded-lg text-xs font-mono font-medium bg-polar-850 border border-polar-750 text-ice-300"
               >
                 🔬 {discipline}
               </span>
@@ -152,7 +154,7 @@ export const StationDetailDrawer: React.FC<StationDetailDrawerProps> = ({ statio
           <div>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <Database className="w-3.5 h-3.5 text-frost-cyan" /> Connected Datasets ({connectedDatasets.length})
+                <Database className="w-3.5 h-3.5 text-ice-400" /> Connected Datasets ({connectedDatasets.length})
               </h3>
             </div>
             <div className="space-y-2">
@@ -170,7 +172,7 @@ export const StationDetailDrawer: React.FC<StationDetailDrawerProps> = ({ statio
                       onNavigate('data', d.id);
                       onClose();
                     }}
-                    className="px-3 py-1.5 rounded-lg bg-polar-800 hover:bg-polar-700 text-frost-cyan text-xs font-semibold whitespace-nowrap transition-colors"
+                    className="px-3 py-1.5 rounded-lg bg-polar-800 hover:bg-polar-700 text-ice-300 text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer"
                   >
                     View Dataset
                   </button>
@@ -184,7 +186,7 @@ export const StationDetailDrawer: React.FC<StationDetailDrawerProps> = ({ statio
         {connectedPapers.length > 0 && (
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5 mb-2">
-              <FileText className="w-3.5 h-3.5 text-indigo-400" /> Key Research Publications ({connectedPapers.length})
+              <FileText className="w-3.5 h-3.5 text-teal-400" /> Key Research Publications ({connectedPapers.length})
             </h3>
             <div className="space-y-2">
               {connectedPapers.map((p) => (
@@ -193,7 +195,7 @@ export const StationDetailDrawer: React.FC<StationDetailDrawerProps> = ({ statio
                   <div className="text-[11px] text-slate-400">
                     {p.authors.join(', ')} • <em>{p.journal}</em> ({p.year})
                   </div>
-                  <div className="text-[11px] text-frost-cyan font-mono pt-1">DOI: {p.doi}</div>
+                  <div className="text-[11px] text-ice-300 font-mono pt-1">DOI: {p.doi}</div>
                 </div>
               ))}
             </div>
@@ -204,30 +206,43 @@ export const StationDetailDrawer: React.FC<StationDetailDrawerProps> = ({ statio
         <ProvenanceBadge provenance={station.provenance} />
       </div>
 
-      {/* Footer CTA */}
-      <div className="p-4 bg-polar-950 border-t border-polar-800 flex items-center justify-between">
+      {/* Audience-Aware Footer CTA Gateway */}
+      <div className="p-4 bg-polar-950 border-t border-polar-800 flex flex-wrap items-center justify-between gap-3">
         <a
           href={station.provenance.originalSourceUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs text-frost-cyan hover:underline font-semibold"
+          className="inline-flex items-center gap-1.5 text-xs text-ice-300 hover:underline font-semibold"
         >
           <span>Official {station.operator} Portal</span>
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
 
-        {station.isIndianStation && (
-          <button
-            onClick={() => {
-              onNavigate('india', station.id);
-              onClose();
-            }}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-polar-950 font-bold text-xs flex items-center gap-1.5 transition-all"
-          >
-            <span>Station Dossier</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {isStudent ? (
+            <button
+              onClick={() => {
+                onNavigate('stories');
+                onClose();
+              }}
+              className="px-4 py-2 rounded-xl bg-ice-500 hover:bg-ice-400 text-polar-950 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+            >
+              <span>Explore Guided Stories 🎓</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                onNavigate('data');
+                onClose();
+              }}
+              className="px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-polar-950 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+            >
+              <span>Explore Datasets 🔬</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

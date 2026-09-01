@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,13 +6,15 @@
 
 @layer base {
   :root {
-    --color-bg: #080e18;
-    --color-surface: #0d1421;
-    --color-border: #1d2d45;
-    --color-text: #e8eef4;
-    --color-text-muted: #7a90a8;
-    --color-accent: #5ba3c9;
-    --color-accent-teal: #4db8a8;
+    --color-bg: #060b14;
+    --color-surface: #0a1220;
+    --color-surface-raised: #0e1a2e;
+    --color-border: #1a2942;
+    --color-border-bright: #2d4873;
+    --color-text: #e2ebf3;
+    --color-text-muted: #7991b0;
+    --color-accent: #52a5d7;
+    --color-accent-teal: #42c2b1;
   }
 
   html {
@@ -28,6 +30,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.6;
+    overflow-x: hidden;
   }
 
   /* Focus styles — accessible and visible */
@@ -39,61 +42,61 @@
 
   /* Selection */
   ::selection {
-    background-color: rgba(91, 163, 201, 0.25);
-    color: #e8eef4;
+    background-color: rgba(82, 165, 215, 0.3);
+    color: #ffffff;
   }
 
-  /* Headings — consistent across all pages */
+  /* Headings */
   h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.02em;
-    color: #f0f4f8;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+    color: #f1f7fc;
   }
 
   /* Links */
   a {
     color: var(--color-accent);
     text-decoration: none;
+    transition: color 0.15s ease;
   }
   a:hover {
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    color: #7ec1e8;
   }
 
-  /* Custom scrollbar — restrained */
+  /* Custom scrollbar — restrained scientific scrollbar */
   ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    width: 6px;
+    height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #080e18;
+    background: #060b14;
   }
   ::-webkit-scrollbar-thumb {
-    background: #253752;
-    border-radius: 2px;
+    background: #1b2f4f;
+    border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #3a5a84;
+    background: #2b4775;
   }
 
   /* Tables */
   table {
     border-collapse: collapse;
+    width: 100%;
   }
   th {
     font-weight: 600;
-    font-size: 0.7rem;
-    letter-spacing: 0.06em;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #7a90a8;
-    font-family: 'Inter', system-ui, sans-serif;
+    color: #7991b0;
+    font-family: 'JetBrains Mono', monospace;
   }
 
   /* Code */
   code, kbd {
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.85em;
   }
 }
@@ -101,117 +104,67 @@
 @layer components {
   /* Scientific metadata label */
   .meta-label {
-    @apply text-2xs font-medium tracking-widest uppercase text-slate-500;
-    font-family: 'Inter', system-ui, sans-serif;
+    @apply text-2xs font-mono font-medium tracking-widest uppercase text-slate-400;
   }
 
   /* Clean bordered section divider */
   .section-divider {
-    @apply border-t border-ink-700;
+    @apply border-t border-polar-800/60;
   }
 
-  /* Primary button — minimal, professional */
+  /* Primary button — minimal, high tactile precision */
   .btn-primary {
     @apply inline-flex items-center gap-2 px-5 py-2.5 bg-ice-500 hover:bg-ice-400 
-           text-polar-950 font-semibold text-sm rounded-md transition-colors duration-150;
-    font-family: 'Inter', system-ui, sans-serif;
+           active:scale-[0.98] text-polar-950 font-semibold text-sm rounded-md 
+           shadow-sm transition-all duration-150 cursor-pointer select-none;
+  }
+
+  /* Secondary button */
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 bg-polar-800/80 hover:bg-polar-750 
+           border border-polar-700 hover:border-ice-500/50 text-white font-medium text-sm 
+           rounded-md transition-all duration-150 cursor-pointer select-none;
   }
 
   /* Ghost button */
   .btn-ghost {
-    @apply inline-flex items-center gap-2 px-4 py-2 border border-ink-700 
-           hover:border-ice-400 text-slate-300 hover:text-white font-medium text-sm 
-           rounded-md transition-colors duration-150;
-    font-family: 'Inter', system-ui, sans-serif;
-  }
-
-  /* Student mode button */
-  .btn-student {
-    @apply inline-flex items-center gap-2 px-5 py-2.5 bg-teal-500 hover:bg-teal-400
-           text-white font-semibold text-sm rounded-md transition-colors duration-150;
-  }
-
-  /* Researcher mode button */
-  .btn-researcher {
-    @apply inline-flex items-center gap-2 px-5 py-2.5 bg-ice-600 hover:bg-ice-500
-           text-white font-semibold text-sm rounded-md transition-colors duration-150;
+    @apply inline-flex items-center gap-2 px-4 py-2 border border-polar-800 
+           hover:border-polar-700 hover:bg-polar-900/60 text-slate-300 hover:text-white font-medium text-sm 
+           rounded-md transition-all duration-150 cursor-pointer select-none;
   }
 
   /* Text link with arrow */
   .text-link {
-    @apply inline-flex items-center gap-1 text-ice-400 hover:text-ice-300 
-           font-medium text-sm transition-colors duration-100;
+    @apply inline-flex items-center gap-1.5 text-ice-400 hover:text-ice-300 
+           font-medium text-sm transition-colors duration-150;
   }
 
-  /* Badge / tag — no pill shape */
+  /* Tag / Badge */
   .tag {
-    @apply inline-block px-2 py-0.5 text-2xs font-medium uppercase tracking-wider 
-           border border-ink-700 text-slate-400 rounded-sm;
-    font-family: 'Inter', system-ui, sans-serif;
-  }
-
-  /* Topic / discipline tag */
-  .discipline-tag {
-    @apply inline-block px-2.5 py-0.5 text-2xs font-semibold uppercase tracking-wider
-           border border-ice-600/40 text-ice-400 rounded-sm bg-ice-600/10;
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 text-2xs font-mono font-medium uppercase tracking-wider 
+           border border-polar-750 bg-polar-900/80 text-slate-300 rounded-sm;
   }
 
   /* Scientific data table row */
   .data-row {
-    @apply border-b border-ink-700 hover:bg-ink-800 transition-colors duration-100;
+    @apply border-b border-polar-800/60 hover:bg-polar-850/60 transition-colors duration-150;
   }
 
-  /* Panel / Card */
+  /* Glass Bento Panel */
+  .glass-panel {
+    background: rgba(10, 18, 32, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    @apply rounded-xl shadow-panel transition-all duration-200;
+  }
+  
+  .glass-panel-hover {
+    @apply glass-panel hover:border-ice-500/30 hover:bg-polar-900/90 hover:shadow-ice-glow;
+  }
+
+  /* Polar Card */
   .panel {
-    @apply bg-ink-800 border border-ink-700 rounded-lg;
-  }
-
-  /* Student content card */
-  .student-card {
-    @apply bg-polar-900 border border-ink-700 rounded-lg p-5;
-  }
-
-  /* Researcher content card */
-  .researcher-card {
-    @apply bg-polar-900 border border-polar-700 rounded-lg p-5;
-  }
-
-  /* Section header with line accent */
-  .section-header {
-    @apply flex items-center gap-2 mb-3;
-  }
-
-  /* Page section spacing */
-  .page-section {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20;
-  }
-
-  /* Mode badge — student */
-  .mode-student {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full 
-           bg-teal-500/10 border border-teal-500/30 text-teal-400 text-xs font-semibold;
-  }
-
-  /* Mode badge — researcher */
-  .mode-researcher {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full 
-           bg-ice-500/10 border border-ice-500/30 text-ice-400 text-xs font-semibold;
-  }
-
-  /* Fact card — for student mode */
-  .fact-card {
-    @apply p-4 rounded-lg border border-ink-700 bg-polar-900;
-  }
-
-  /* Provenance notice */
-  .provenance-notice {
-    @apply flex items-start gap-2 p-3 rounded-md bg-polar-950 border border-ink-700 text-2xs text-slate-500;
-  }
-
-  /* Animated underline link */
-  .hover-line {
-    @apply relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px 
-           after:bg-ice-400 after:transition-all after:duration-200 hover:after:w-full;
+    @apply bg-polar-900/90 border border-polar-800 rounded-lg shadow-card;
   }
 }
 
@@ -224,52 +177,45 @@
     scrollbar-width: none;
   }
 
+  /* Grid pattern overlay */
+  .bg-polar-grid {
+    background-image: radial-gradient(rgba(82, 165, 215, 0.1) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+
+  .bg-polar-lines {
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
   /* Animation utilities */
-  .animate-in {
-    animation-fill-mode: both;
+  .animate-pulse-subtle {
+    animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
-  .fade-in {
-    animation-name: fade-in;
-    animation-duration: 0.2s;
-    animation-timing-function: ease-out;
+  .animate-radar {
+    animation: radar-ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
+}
 
-  .slide-up {
-    animation-name: slide-up;
-    animation-duration: 0.3s;
-    animation-timing-function: ease-out;
-  }
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(0.995); }
+}
 
-  @keyframes fade-in {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes radar-ping {
+  75%, 100% {
+    transform: scale(2.2);
+    opacity: 0;
   }
+}
 
-  @keyframes slide-up {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Reduce motion */
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-
-  /* Text balance */
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  /* Grid auto-fit patterns */
-  .grid-auto-fit-sm {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  }
-  .grid-auto-fit-md {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
