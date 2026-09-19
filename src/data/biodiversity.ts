@@ -26,6 +26,11 @@ export const POLAR_SPECIES: Species[] = [
     ],
     overview: 'The Emperor Penguin is the tallest and heaviest of all living penguin species, endemic exclusively to Antarctica. They are the only bird species that breeds during the harsh, pitch-black Antarctic winter.',
     imageUrl: 'https://images.unsplash.com/photo-1548685913-fe6574346a23?auto=format&fit=crop&w=1200&q=80',
+    imageGallery: [
+      'https://images.unsplash.com/photo-1548685913-fe6574346a23?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1598439210625-5067c578f3f6?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80'
+    ],
     imageCredit: 'Wikimedia Commons / Christopher Michel (CC-BY 2.0)',
     provenance: {
       sourceOrganization: 'SCAR Antarctic Biodiversity Portal & IUCN Red List',
@@ -62,6 +67,11 @@ export const POLAR_SPECIES: Species[] = [
     ],
     overview: 'The Polar Bear is the apex predator of the Arctic marine ecosystem, classified as a marine mammal because it spends the majority of its life on the sea ice hunting seals.',
     imageUrl: 'https://images.unsplash.com/photo-1589656966895-2f33e7653819?auto=format&fit=crop&w=1200&q=80',
+    imageGallery: [
+      'https://images.unsplash.com/photo-1589656966895-2f33e7653819?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1200&q=80'
+    ],
     imageCredit: 'Wikimedia Commons / Alan Wilson (CC-BY-SA 3.0)',
     provenance: {
       sourceOrganization: 'IUCN Polar Bear Specialist Group (PBSG) & Norwegian Polar Institute',
@@ -98,6 +108,11 @@ export const POLAR_SPECIES: Species[] = [
     ],
     overview: 'Antarctic Krill is the keystone species of the Southern Ocean ecosystem. With a cumulative biomass exceeding that of humanity, almost all Antarctic wildlife—whales, seals, penguins, flying seabirds, and squid—depends directly or indirectly on krill.',
     imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
+    imageGallery: [
+      'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80'
+    ],
     imageCredit: 'Wikimedia Commons / Uwe Kils (CC-BY-SA 3.0)',
     provenance: {
       sourceOrganization: 'Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR) & OBIS',
@@ -132,6 +147,11 @@ export const POLAR_SPECIES: Species[] = [
     ],
     overview: 'The Weddell Seal is the southernmost breeding mammal in the world, living year-round on the fast ice of Antarctica. They are famed for their complex alien-like underwater vocalizations consisting of chirps, whistles, and frequency sweeps.',
     imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    imageGallery: [
+      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1200&q=80'
+    ],
     imageCredit: 'Wikimedia Commons / NOAA (Public Domain)',
     provenance: {
       sourceOrganization: 'SCAR Expert Group on Birds and Marine Mammals & OBIS-SEAMAP',
@@ -166,6 +186,11 @@ export const POLAR_SPECIES: Species[] = [
     ],
     overview: 'The Arctic Fox is a master of winter survival, possessing the warmest pelt of any land mammal relative to its body size. It can survive temperatures as low as -70°C before its metabolic rate begins to increase.',
     imageUrl: 'https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?auto=format&fit=crop&w=1200&q=80',
+    imageGallery: [
+      'https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1200&q=80'
+    ],
     imageCredit: 'Wikimedia Commons / Jonatan Pie (CC0 Public Domain)',
     provenance: {
       sourceOrganization: 'IUCN Canid Specialist Group & Svalbard Science Forum',

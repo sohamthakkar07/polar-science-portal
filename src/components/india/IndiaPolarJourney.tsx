@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Flag,
   MapPin,
@@ -28,18 +29,16 @@ import { RESEARCH_PAPERS } from '../../data/researchPapers';
 import { ResearchStation } from '../../types/polar';
 import { DataVisualizer } from '../data/DataVisualizer';
 import { ProvenanceBadge } from '../layout/ProvenanceBadge';
-import { useAudience } from '../../context/AudienceContext';
 import { NavTab } from '../layout/Navbar';
+
+import { StationDetailExperience } from '../map/StationDetailExperience';
 
 interface IndiaPolarJourneyProps {
   onNavigate: (tab: NavTab, detailId?: string) => void;
   initialStationId?: string;
 }
 
-type StationTab = 'mission' | 'data' | 'datasets';
-
 export const IndiaPolarJourney: React.FC<IndiaPolarJourneyProps> = ({ onNavigate, initialStationId }) => {
-  const { isStudent } = useAudience();
   const indianStations = RESEARCH_STATIONS.filter((s) => s.isIndianStation);
 
   const [selectedStationId, setSelectedStationId] = useState<string>(
@@ -47,7 +46,6 @@ export const IndiaPolarJourney: React.FC<IndiaPolarJourneyProps> = ({ onNavigate
       ? initialStationId
       : 'maitri'
   );
-  const [activeStationTab, setActiveStationTab] = useState<StationTab>('mission');
   const [selectedTimelineRegion, setSelectedTimelineRegion] = useState<string>('all');
   const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState<number>(0);
 
@@ -270,8 +268,10 @@ export const IndiaPolarJourney: React.FC<IndiaPolarJourneyProps> = ({ onNavigate
             {filteredMilestones.map((m, idx) => {
               const isSelected = selectedMilestoneIndex === idx;
               return (
-                <button
+                <motion.button
                   key={idx}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => setSelectedMilestoneIndex(idx)}
                   className={`px-4 py-2.5 rounded-xl font-bold whitespace-nowrap transition-all border flex items-center gap-2 cursor-pointer ${
                     isSelected
@@ -281,7 +281,7 @@ export const IndiaPolarJourney: React.FC<IndiaPolarJourneyProps> = ({ onNavigate
                 >
                   <span className="text-xs font-extrabold">{m.year}</span>
                   <span className="text-2xs opacity-80 max-w-[140px] truncate">{m.title.split(' ')[0]}</span>
-                </button>
+                </motion.button>
               );
             })}
           </div>
@@ -410,299 +410,53 @@ export const IndiaPolarJourney: React.FC<IndiaPolarJourneyProps> = ({ onNavigate
             })}
           </div>
 
-          {/* Tabbed Station Dossier Panel */}
-          <div className="bg-polar-900/90 rounded-2xl border border-polar-800 overflow-hidden backdrop-blur-xl shadow-panel space-y-0">
-            {/* Dossier Header */}
-            <div className="p-6 sm:p-8 bg-polar-950/80 border-b border-polar-800 flex flex-col md:flex-row md:items-start justify-between gap-6">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="px-2.5 py-0.5 rounded text-2xs font-mono font-semibold bg-ice-500/20 text-ice-300 border border-ice-500/40">
-                    {activeStation.region}
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded text-2xs font-mono text-slate-300 bg-polar-900 border border-polar-750">
-                    {activeStation.status}
-                  </span>
-                </div>
-                <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                  {activeStation.name}
-                  {activeStation.nativeName && (
-                    <span className="text-base text-ice-300 font-normal ml-2 font-mono">({activeStation.nativeName})</span>
-                  )}
-                </h3>
-                <p className="text-xs text-slate-300 font-mono flex items-center gap-1.5 mt-2">
-                  <MapPin className="w-3.5 h-3.5 text-ice-400" />
-                  <span>{activeStation.subRegion} • Lat: {Math.abs(activeStation.latitude).toFixed(2)}°{activeStation.latitude < 0 ? 'S' : 'N'}</span>
-                </p>
-              </div>
-
-              {/* Climate Summary Stats */}
-              <div className="grid grid-cols-3 gap-2 font-mono shrink-0">
-                <div className="p-3 rounded-xl bg-polar-900 border border-polar-800 text-center">
-                  <div className="text-3xs uppercase font-semibold text-slate-400">Avg Temp</div>
-                  <div className="text-xs font-bold text-ice-300 mt-1">{activeStation.climateSummary.avgAnnualTempC}°C</div>
-                </div>
-                <div className="p-3 rounded-xl bg-polar-900 border border-polar-800 text-center">
-                  <div className="text-3xs uppercase font-semibold text-slate-400">Elevation</div>
-                  <div className="text-xs font-bold text-teal-300 mt-1">{activeStation.elevationMeters}m</div>
-                </div>
-                <div className="p-3 rounded-xl bg-polar-900 border border-polar-800 text-center">
-                  <div className="text-3xs uppercase font-semibold text-slate-400">Capacity</div>
-                  <div className="text-xs font-bold text-ice-300 mt-1">{activeStation.crewCapacityWinter}/{activeStation.crewCapacitySummer}</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Dossier Tabs */}
-            <div className="flex items-center gap-2 border-b border-polar-800 px-6 pt-3 font-mono text-xs overflow-x-auto no-scrollbar">
-              <button
-                onClick={() => setActiveStationTab('mission')}
-                className={`px-4 py-2.5 rounded-t-xl font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                  activeStationTab === 'mission'
-                    ? 'bg-polar-900 text-ice-300 border-t border-x border-polar-800'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <Compass className="w-4 h-4" />
-                <span>Mission & Identity</span>
-              </button>
-
-              <button
-                onClick={() => setActiveStationTab('data')}
-                className={`px-4 py-2.5 rounded-t-xl font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                  activeStationTab === 'data'
-                    ? 'bg-polar-900 text-ice-300 border-t border-x border-polar-800'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <Activity className="w-4 h-4" />
-                <span>Observations & Data</span>
-              </button>
-
-              <button
-                onClick={() => setActiveStationTab('datasets')}
-                className={`px-4 py-2.5 rounded-t-xl font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                  activeStationTab === 'datasets'
-                    ? 'bg-polar-900 text-ice-300 border-t border-x border-polar-800'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <Database className="w-4 h-4" />
-                <span>Connected Datasets ({connectedDatasets.length})</span>
-              </button>
-            </div>
-
-            {/* TAB 1: MISSION & IDENTITY */}
-            {activeStationTab === 'mission' && (
-              <div className="p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in duration-150">
-                <div className="lg:col-span-7 space-y-6">
-                  <div>
-                    <h4 className="text-2xs font-mono font-semibold uppercase tracking-widest text-slate-400 mb-2">Station Overview & Purpose</h4>
-                    <p className="text-xs sm:text-sm text-slate-300 leading-relaxed bg-polar-950/70 p-4 rounded-xl border border-polar-800">
-                      {activeStation.overview}
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="text-2xs font-mono font-semibold uppercase tracking-widest text-slate-400 mb-2">Research Highlights</h4>
-                    <div className="space-y-2">
-                      {activeStation.researchHighlights.map((hl, i) => (
-                        <div key={i} className="text-xs text-slate-300 flex items-start gap-2.5 bg-polar-950/40 p-3 rounded-lg border border-polar-800">
-                          <span className="text-ice-400 font-bold">•</span>
-                          <span>{hl}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-5 space-y-6">
-                  <div>
-                    <h4 className="text-2xs font-mono font-semibold uppercase tracking-widest text-slate-400 mb-2">Historical Significance</h4>
-                    <p className="text-xs text-slate-300 leading-relaxed bg-polar-950/70 p-4 rounded-xl border border-polar-800">
-                      {activeStation.historicalSignificance}
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="text-2xs font-mono font-semibold uppercase tracking-widest text-slate-400 mb-2">Research Disciplines</h4>
-                    <div className="flex flex-wrap gap-1.5 font-mono text-xs">
-                      {activeStation.scientificDisciplines.map((d, i) => (
-                        <span key={i} className="px-2.5 py-1 rounded bg-polar-950 border border-polar-800 text-ice-300">
-                          🔬 {d}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 2: OBSERVATIONS & DATA */}
-            {activeStationTab === 'data' && (
-              <div className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-150">
-                {activeStation.id === 'maitri' ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between font-mono text-xs">
-                      <span className="font-bold text-white flex items-center gap-2">
-                        <Database className="w-4 h-4 text-ice-300" />
-                        Maitri Station 34-Year Surface Meteorological Time Series (1990–2024)
-                      </span>
-                      <span className="text-2xs text-ice-300 font-semibold">NCPOR Archived Dataset</span>
-                    </div>
-                    <DataVisualizer datasetKey="maitri_met" />
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="p-4 rounded-xl bg-polar-950 border border-polar-800 text-xs text-slate-300 space-y-2">
-                      <div className="font-mono font-bold text-ice-300 uppercase text-2xs">In-Situ Observational Systems:</div>
-                      <p className="leading-relaxed">
-                        {activeStation.name} maintains continuous telemetry sensors measuring surface temperature (Avg {activeStation.climateSummary.avgAnnualTempC}°C, Record Min {activeStation.climateSummary.recordMinTempC}°C), katabatic wind velocity (Avg {activeStation.climateSummary.avgWindSpeedKmh} km/h), and atmospheric pressure.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
-                      <div className="p-4 rounded-xl bg-polar-950 border border-polar-800 space-y-1">
-                        <div className="text-2xs text-slate-400 uppercase">Operational Range</div>
-                        <div className="font-bold text-white">Established {activeStation.establishedYear} • {activeStation.status}</div>
-                      </div>
-                      <div className="p-4 rounded-xl bg-polar-950 border border-polar-800 space-y-1">
-                        <div className="text-2xs text-slate-400 uppercase">Crew Capacity</div>
-                        <div className="font-bold text-white">{activeStation.crewCapacityWinter} Winter / {activeStation.crewCapacitySummer} Summer Researchers</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* TAB 3: CONNECTED DATA & RESEARCH */}
-            {activeStationTab === 'datasets' && (
-              <div className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-150">
-                {connectedDatasets.length > 0 ? (
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
-                      NCPOR Preserved Repositories ({connectedDatasets.length})
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
-                      {connectedDatasets.map((d) => (
-                        <div key={d.id} className="bg-polar-950 p-4 rounded-xl border border-polar-800 flex items-center justify-between gap-3">
-                          <div>
-                            <div className="font-bold text-white">{d.shortTitle}</div>
-                            <div className="text-2xs text-slate-400">DOI: {d.provenance.doi}</div>
-                          </div>
-                          <button
-                            onClick={() => onNavigate('data', d.id)}
-                            className="px-3.5 py-2 rounded-xl bg-ice-500 hover:bg-ice-400 text-polar-950 font-bold text-2xs transition-all cursor-pointer whitespace-nowrap"
-                          >
-                            Inspect Dataset →
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-6 rounded-xl bg-polar-950 border border-polar-800 text-xs text-slate-400 font-mono text-center">
-                    No direct NetCDF dataset is linked for this station in the demo view. Explore full NCPOR repositories.
-                  </div>
-                )}
-
-                {connectedPapers.length > 0 && (
-                  <div className="space-y-3 pt-4 border-t border-polar-800">
-                    <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
-                      Connected Peer-Reviewed Publications ({connectedPapers.length})
-                    </h4>
-                    <div className="space-y-2">
-                      {connectedPapers.map((p) => (
-                        <div
-                          key={p.id}
-                          onClick={() => onNavigate('research', p.id)}
-                          className="p-3.5 rounded-xl bg-polar-950 hover:bg-polar-850 border border-polar-800 cursor-pointer transition-all flex items-center justify-between gap-3"
-                        >
-                          <div>
-                            <div className="text-xs font-bold text-white">{p.title}</div>
-                            <div className="text-2xs text-slate-400 font-mono">
-                              {p.authors.join(', ')} • {p.journal} ({p.year})
-                            </div>
-                          </div>
-                          <span className="text-xs font-mono text-ice-300 font-bold whitespace-nowrap">View Paper &rarr;</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Provenance Footer */}
-            <div className="p-6 border-t border-polar-800">
-              <ProvenanceBadge provenance={activeStation.provenance} />
-            </div>
+          {/* Render Full Cinematic StationDetailExperience */}
+          <div className="rounded-3xl border border-polar-750 overflow-hidden shadow-2xl">
+            <StationDetailExperience
+              station={activeStation}
+              onSelectStation={(s) => setSelectedStationId(s.id)}
+              onNavigate={onNavigate}
+            />
           </div>
         </div>
 
-        {/* PART F: AUDIENCE-AWARE NEXT ACTIONS */}
+        {/* PART F: UNIFIED NEXT ACTIONS */}
         <div className="p-6 sm:p-8 rounded-2xl bg-polar-900/90 border border-polar-800 space-y-4 backdrop-blur-xl shadow-panel">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-mono text-xs">
             <span className="text-slate-400">
-              {isStudent
-                ? 'Ready to test your knowledge on India’s polar expeditions?'
-                : 'Inspect the underlying NCPOR datasets and scholarly literature:'}
+              Continue exploring India's polar science contributions:
             </span>
             <span className="text-ice-300 font-bold">
-              {isStudent ? 'Next Stage: Quiz Challenge 🏆' : 'Next Stage: NCPOR Repositories 🔬'}
+              Next Stage: Quiz Challenge & Datasets 🏆
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
-            {isStudent ? (
-              <>
-                <button
-                  onClick={() => onNavigate('quiz')}
-                  className="px-5 py-3.5 bg-ice-500 hover:bg-ice-400 text-polar-950 font-bold rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                    <Trophy className="w-4 h-4" />
-                    <span>Test Knowledge on India's Polar Programme 🏆</span>
-                  </div>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onNavigate('quiz')}
+              className="px-5 py-3.5 bg-ice-500 hover:bg-ice-400 text-polar-950 font-bold rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4" />
+                <span>Test Knowledge on India's Polar Programme 🏆</span>
+              </div>
+              <ArrowRight className="w-4 h-4" />
+            </motion.button>
 
-                <button
-                  onClick={() => onNavigate('explore')}
-                  className="px-5 py-3.5 bg-polar-950 hover:bg-polar-850 border border-polar-750 text-slate-200 hover:text-white font-semibold rounded-xl transition-all cursor-pointer flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                    <Compass className="w-4 h-4 text-ice-300" />
-                    <span>Explore Stations on Map 🗺️</span>
-                  </div>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => onNavigate('data')}
-                  className="px-5 py-3.5 bg-teal-500 hover:bg-teal-400 text-polar-950 font-bold rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                    <Database className="w-4 h-4" />
-                    <span>Inspect NCPOR Datasets & Evidence 🔬</span>
-                  </div>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={() => onNavigate('research')}
-                  className="px-5 py-3.5 bg-polar-950 hover:bg-polar-850 border border-polar-750 text-slate-200 hover:text-white font-semibold rounded-xl transition-all cursor-pointer flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-ice-300" />
-                    <span>Explore Connected Research 📑</span>
-                  </div>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </>
-            )}
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onNavigate('data')}
+              className="px-5 py-3.5 bg-teal-500 hover:bg-teal-400 text-polar-950 font-bold rounded-xl shadow-sm transition-all cursor-pointer flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <Database className="w-4 h-4" />
+                <span>Inspect NCPOR Datasets & Evidence 🔬</span>
+              </div>
+              <ArrowRight className="w-4 h-4" />
+            </motion.button>
           </div>
         </div>
 

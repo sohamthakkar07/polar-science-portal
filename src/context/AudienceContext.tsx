@@ -1,71 +1,30 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext } from 'react';
 
 export type AudienceMode = 'student' | 'researcher';
 
 interface AudienceContextType {
   mode: AudienceMode;
-
-  // Original function
   setMode: (mode: AudienceMode) => void;
-
-  // Alias used by HeroSection
   setAudienceMode: (mode: AudienceMode) => void;
-
   isStudent: boolean;
   isResearcher: boolean;
-
   toggleMode: () => void;
 }
 
-const AudienceContext = createContext<AudienceContextType | undefined>(
-  undefined
-);
+const defaultContext: AudienceContextType = {
+  mode: 'student',
+  setMode: () => {},
+  setAudienceMode: () => {},
+  isStudent: true,
+  isResearcher: false,
+  toggleMode: () => {},
+};
 
-export const AudienceProvider: React.FC<{
-  children: React.ReactNode;
-}> = ({ children }) => {
+const AudienceContext = createContext<AudienceContextType>(defaultContext);
 
-  const [mode, setModeState] = useState<AudienceMode>(() => {
-    const saved = localStorage.getItem('polarverse_audience_mode');
-
-    return saved === 'researcher' || saved === 'student'
-      ? saved
-      : 'student';
-  });
-
-  const setMode = (newMode: AudienceMode) => {
-    setModeState(newMode);
-
-    localStorage.setItem(
-      'polarverse_audience_mode',
-      newMode
-    );
-  };
-
-  // Alias so components using setAudienceMode also work
-  const setAudienceMode = (newMode: AudienceMode) => {
-    setMode(newMode);
-  };
-
-  const toggleMode = () => {
-    setMode(
-      mode === 'student'
-        ? 'researcher'
-        : 'student'
-    );
-  };
-
+export const AudienceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <AudienceContext.Provider
-      value={{
-        mode,
-        setMode,
-        setAudienceMode,
-        isStudent: mode === 'student',
-        isResearcher: mode === 'researcher',
-        toggleMode,
-      }}
-    >
+    <AudienceContext.Provider value={defaultContext}>
       {children}
     </AudienceContext.Provider>
   );
@@ -73,12 +32,5 @@ export const AudienceProvider: React.FC<{
 
 export const useAudience = (): AudienceContextType => {
   const context = useContext(AudienceContext);
-
-  if (!context) {
-    throw new Error(
-      'useAudience must be used within an AudienceProvider'
-    );
-  }
-
-  return context;
+  return context || defaultContext;
 };

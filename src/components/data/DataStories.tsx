@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles,
   ArrowRight,
@@ -10,7 +11,12 @@ import {
   ShieldCheck,
   Award,
   ExternalLink,
-  BookOpen
+  BookOpen,
+  Radio,
+  Compass,
+  Zap,
+  Globe2,
+  Layers
 } from 'lucide-react';
 import { DATA_STORIES } from '../../data/dataStories';
 import { DataStory, DataStoryStep } from '../../types/polar';
@@ -19,8 +25,10 @@ import { ProvenanceBadge } from '../layout/ProvenanceBadge';
 import { RESEARCH_PAPERS } from '../../data/researchPapers';
 import { QUIZ_QUESTIONS } from '../../data/quizzes';
 import { useQuiz } from '../../context/QuizContext';
-import { useAudience } from '../../context/AudienceContext';
 import { NavTab } from '../layout/Navbar';
+import { LearningEnvironment } from '../learn/LearningEnvironment';
+import { EnvironmentTheme } from '../learn/EnvironmentBackground';
+import { StoryProgressRail } from '../learn/StoryProgressRail';
 
 interface DataStoriesProps {
   onNavigate: (tab: NavTab, detailId?: string) => void;
@@ -28,7 +36,6 @@ interface DataStoriesProps {
 }
 
 export const DataStories: React.FC<DataStoriesProps> = ({ onNavigate, initialStorySlug }) => {
-  const { isStudent } = useAudience();
   const [selectedStoryIndex, setSelectedStoryIndex] = useState<number>(() => {
     if (initialStorySlug) {
       const idx = DATA_STORIES.findIndex((s) => s.slug === initialStorySlug);
@@ -43,12 +50,22 @@ export const DataStories: React.FC<DataStoriesProps> = ({ onNavigate, initialSto
 
   const { recordAnswer } = useQuiz();
 
-  const story: DataStory = DATA_STORIES[selectedStoryIndex];
-  const step: DataStoryStep = story.steps[currentStepIndex];
+  const story: DataStory = DATA_STORIES[selectedStoryIndex] || DATA_STORIES[0];
+  const step: DataStoryStep = story.steps[currentStepIndex] || story.steps[0];
   const totalSteps = story.steps.length;
 
   const connectedPaper = RESEARCH_PAPERS.find((p) => p.id === story.concludingResearchId);
   const connectedQuiz = QUIZ_QUESTIONS.find((q) => q.id === story.relatedQuizId);
+
+  // Map story topic to environment theme
+  const getThemeForStory = (s: DataStory): EnvironmentTheme => {
+    if (s.id.includes('sea-ice') || s.topic === 'Cryosphere') return 'sea-ice';
+    if (s.id.includes('ozone') || s.topic === 'Atmosphere') return 'ozone-atmosphere';
+    if (s.topic === 'Ocean') return 'ocean-climate';
+    return 'space-satellite';
+  };
+
+  const activeTheme = getThemeForStory(story);
 
   const handleNextStep = () => {
     if (currentStepIndex < totalSteps - 1) {
@@ -72,247 +89,350 @@ export const DataStories: React.FC<DataStoriesProps> = ({ onNavigate, initialSto
   };
 
   return (
-    <div className="w-full min-h-screen bg-polar-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto space-y-8">
-        {/* Header Title */}
-        <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-polar-900 border border-ice-500/30 text-ice-300 text-2xs font-mono">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span className="uppercase tracking-wider font-semibold">Guided Data Scrollytelling</span>
+    <LearningEnvironment theme={activeTheme} stageIndex={currentStepIndex}>
+      <div className="w-full py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
+        
+        {/* EDITORIAL HEADER TITLE */}
+        <div className="text-center space-y-3 pt-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-polar-900/90 border border-ice-400/40 text-ice-300 text-xs font-mono backdrop-blur-md shadow-lg">
+            <Radio className="w-3.5 h-3.5 text-teal-400 animate-pulse" />
+            <span className="uppercase tracking-widest font-bold">CINEMATIC GUIDED SCROLLYTELLING</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-bold text-white tracking-tight">
-            Interactive Data Stories
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight drop-shadow-md font-sans">
+            Interactive Polar Science Stories
           </h1>
-          <p className="text-sm text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Guided scientific discovery journeys connecting measurements to climate mechanisms, research papers, and interactive comprehension checks.
+          <p className="text-sm sm:text-base text-slate-300 max-w-3xl mx-auto leading-relaxed">
+            Travel through satellite observations, polar ice sheets, atmospheric chemistry, and ground-truth climate evidence.
           </p>
         </div>
 
-        {/* Story Selection Tabs */}
-        <div className="flex flex-wrap justify-center gap-2">
+        {/* REDESIGNED STORY SELECTOR CARDS WITH ENVIRONMENT PREVIEWS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-4xl mx-auto">
           {DATA_STORIES.map((s, idx) => {
             const isActive = selectedStoryIndex === idx;
+            const cardTheme = getThemeForStory(s);
             return (
-              <button
+              <motion.button
                 key={s.id}
+                type="button"
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => handleSelectStory(idx)}
-                className={`px-4 py-2.5 rounded-lg text-xs font-mono font-semibold transition-all border ${
+                className={`relative overflow-hidden rounded-2xl p-5 text-left transition-all border cursor-pointer group shadow-xl ${
                   isActive
-                    ? 'bg-ice-500 text-polar-950 border-ice-400 shadow-sm font-bold'
-                    : 'bg-polar-900/80 border-polar-800 text-slate-300 hover:text-white hover:bg-polar-850'
+                    ? 'bg-polar-900/95 border-ice-400 ring-2 ring-ice-400/40'
+                    : 'bg-polar-950/80 border-polar-800 hover:border-polar-700 hover:bg-polar-900/80'
                 }`}
               >
-                <span>{s.title}</span>
-              </button>
+                {/* Background Environment Image Preview */}
+                <div className="absolute inset-0 z-0 overflow-hidden opacity-30 group-hover:opacity-40 transition-opacity">
+                  <img
+                    src={s.heroImage}
+                    alt={s.title}
+                    className="w-full h-full object-cover filter contrast-110 brightness-90 group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-polar-950 via-polar-950/80 to-transparent" />
+                </div>
+
+                <div className="relative z-10 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2.5 py-0.5 rounded-full text-2xs font-mono font-bold bg-ice-500/20 border border-ice-400/50 text-ice-300">
+                      {s.topic} • {s.region}
+                    </span>
+                    {isActive && (
+                      <span className="flex items-center gap-1 text-2xs font-mono text-teal-300 font-bold bg-teal-500/20 px-2 py-0.5 rounded border border-teal-500/40">
+                        <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-ping" />
+                        ACTIVE JOURNEY
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold text-white leading-snug group-hover:text-ice-200 transition-colors">
+                    {s.title}
+                  </h3>
+                  <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                    {s.subtitle}
+                  </p>
+                </div>
+              </motion.button>
             );
           })}
         </div>
 
-        {/* Active Story Container */}
-        <div className="bg-polar-900/90 rounded-2xl border border-polar-800 p-6 sm:p-8 shadow-panel backdrop-blur-xl space-y-6">
-          {/* Progress Steps Indicator */}
-          <div className="space-y-2 border-b border-polar-800 pb-6">
-            <div className="flex items-center justify-between text-xs font-mono text-slate-300">
-              <span className="font-bold text-ice-300 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-ice-400 animate-pulse" />
-                Step {step.stepNumber} of {totalSteps}: {step.phaseTitle}
-              </span>
-              <span className="bg-polar-950 border border-polar-750 px-2.5 py-0.5 rounded text-2xs text-ice-300">
-                {Math.round(((currentStepIndex + 1) / totalSteps) * 100)}% Complete
-              </span>
-            </div>
+        {/* MAIN EDITORIAL STORY WORKSPACE GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Side Expedition Progress Rail (Desktop) */}
+          <div className="lg:col-span-4 sticky top-24">
+            <StoryProgressRail
+              stages={story.steps}
+              currentStepIndex={currentStepIndex}
+              onSelectStep={(idx) => setCurrentStepIndex(idx)}
+            />
 
-            {/* Segmented reading progress bar */}
-            <div className="w-full h-2 bg-polar-950 rounded-full overflow-hidden flex p-0.5 border border-polar-800 shadow-inner">
-              {story.steps.map((_, i) => (
-                <div
-                  key={i}
-                  className={`flex-1 h-full rounded-sm transition-all duration-300 ${
-                    i <= currentStepIndex ? 'bg-ice-400 shadow-sm' : 'bg-polar-800/40'
-                  }`}
-                />
-              ))}
+            {/* Scientific Telemetry Metadata Box */}
+            <div className="mt-4 p-4 rounded-2xl bg-polar-900/80 border border-polar-750 backdrop-blur-xl text-xs space-y-2 shadow-lg">
+              <div className="text-2xs font-mono font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                <Compass className="w-3.5 h-3.5 text-ice-400" />
+                <span>Observed Metric Overview</span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed font-mono bg-polar-950/80 p-3 rounded-xl border border-polar-800">
+                {story.whatAreWeMeasuring}
+              </p>
             </div>
           </div>
 
-          {/* Step Main Content */}
-          <div className="space-y-6">
-            <div>
-              <span className="text-2xs font-mono font-semibold uppercase tracking-widest text-teal-400">
-                {step.phaseTitle}
-              </span>
-              <h2 className="text-xl sm:text-3xl font-bold text-white tracking-tight mt-1">
-                {step.headline}
-              </h2>
+          {/* Main Editorial Content Card (Desktop lg:col-span-8) */}
+          <div className="lg:col-span-8 space-y-6">
+            
+            {/* Mobile Progress Bar */}
+            <div className="lg:hidden bg-polar-900/90 border border-polar-800 rounded-2xl p-4 space-y-2 backdrop-blur-md">
+              <div className="flex items-center justify-between text-xs font-mono text-slate-300">
+                <span className="font-bold text-ice-300">
+                  Step {step.stepNumber} of {totalSteps}: {step.phaseTitle}
+                </span>
+                <span className="text-2xs text-teal-300 font-bold">
+                  {Math.round(((currentStepIndex + 1) / totalSteps) * 100)}% Complete
+                </span>
+              </div>
+              <div className="w-full h-2 bg-polar-950 rounded-full overflow-hidden flex p-0.5 border border-polar-800">
+                {story.steps.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`flex-1 h-full rounded-sm transition-all duration-300 ${
+                      i <= currentStepIndex ? 'bg-ice-400' : 'bg-polar-800/40'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
 
-            <p className="text-sm sm:text-base text-slate-200 leading-relaxed bg-polar-950/70 p-5 rounded-xl border border-polar-800">
-              {step.content}
-            </p>
-
-            {/* Embedded Visualizer during Step 2 and 3 */}
-            {(step.stepNumber === 2 || step.stepNumber === 3) && (
-              <div className="space-y-2 pt-2">
-                <DataVisualizer datasetKey={story.timeSeriesKey} title={story.title} />
-              </div>
-            )}
-
-            {/* Reflection Question in Step 4 */}
-            {step.stepNumber === 4 && step.interactiveOptions && (
-              <div className="space-y-3 p-5 rounded-xl bg-polar-950 border border-ice-500/30">
-                <div className="flex items-center gap-2 text-xs font-mono font-semibold text-ice-400 uppercase">
-                  <HelpCircle className="w-4 h-4" />
-                  <span>Scientific Observation Check</span>
-                </div>
-                <p className="text-sm font-semibold text-slate-100">{step.promptQuestion}</p>
-                <div className="space-y-2 pt-2">
-                  {step.interactiveOptions.map((opt) => {
-                    const isSelected = selectedOptionId === opt.id;
-                    return (
-                      <button
-                        key={opt.id}
-                        onClick={() => setSelectedOptionId(opt.id)}
-                        className={`w-full text-left p-3.5 rounded-lg text-xs font-medium border transition-all ${
-                          isSelected
-                            ? 'bg-polar-800 border-ice-400 text-white font-semibold'
-                            : 'bg-polar-900 border-polar-800 text-slate-300 hover:bg-polar-850'
-                        }`}
-                      >
-                        {opt.text}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {selectedOptionId && (
-                  <div className="p-3.5 rounded-lg bg-polar-900 border border-teal-500/40 text-xs text-teal-300 space-y-1">
-                    <span className="font-bold font-mono">Mechanism Explanation: </span>
-                    <span>
-                      {step.interactiveOptions.find((o) => o.id === selectedOptionId)?.isCorrectReason}
+            {/* EDITORIAL LESSON CARD */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step.stepNumber}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className="bg-polar-900/90 border border-polar-750 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-xl space-y-8 relative overflow-hidden"
+              >
+                {/* Step Telemetry Badge Header */}
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-polar-800 pb-5">
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full text-2xs font-mono font-bold bg-ice-500/20 border border-ice-400/40 text-ice-300 uppercase tracking-wider">
+                      PHASE 0{step.stepNumber} · {step.phaseTitle}
+                    </span>
+                    <span className="text-2xs font-mono text-slate-400">
+                      {story.title.split(':')[0]}
                     </span>
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* Scientific Insight Box */}
-            <div className="p-4 rounded-xl bg-polar-950/80 border border-polar-800 text-xs text-slate-300 flex items-start gap-3">
-              <span className="text-base">🔬</span>
-              <div>
-                <strong className="text-slate-100 block mb-0.5 font-mono">Scientific Principle:</strong>
-                <span>{step.scientificInsight}</span>
-              </div>
-            </div>
-
-            {/* Peer Reviewed Research Card in Step 6 */}
-            {step.stepNumber === 6 && connectedPaper && (
-              <div className="p-5 rounded-xl bg-polar-950 border border-polar-800 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-2xs font-mono font-semibold text-teal-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <FileText className="w-4 h-4" /> Supporting Peer-Reviewed Research
+                  <span className="text-2xs font-mono text-teal-300 font-bold bg-polar-950 px-2.5 py-1 rounded-lg border border-polar-750">
+                    Step {step.stepNumber} of {totalSteps}
                   </span>
-                  <span className="text-2xs font-mono text-slate-400">DOI: {connectedPaper.doi}</span>
                 </div>
-                <h3 className="text-sm font-bold text-white">{connectedPaper.title}</h3>
-                <p className="text-xs text-slate-400 italic">
-                  {connectedPaper.authors.join(', ')} ({connectedPaper.year}) • <em>{connectedPaper.journal}</em>
-                </p>
-                <p className="text-xs text-slate-300 bg-polar-900 p-3 rounded-lg border border-polar-800">
-                  {connectedPaper.abstract}
-                </p>
-                <button
-                  onClick={() => onNavigate('research', connectedPaper.id)}
-                  className="text-xs font-mono text-ice-400 hover:underline inline-flex items-center gap-1"
-                >
-                  <span>Read full record in Research Discovery</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
 
-            {/* Interactive Quiz Check in Step 7 */}
-            {step.stepNumber === 7 && connectedQuiz && (
-              <div className="p-5 rounded-xl bg-polar-950 border border-amber-500/30 space-y-3">
-                <div className="flex items-center gap-2 text-2xs font-mono font-semibold text-amber-400 uppercase">
-                  <Award className="w-4 h-4" />
-                  <span>Comprehension Check</span>
+                {/* Main Headline & Lead Content */}
+                <div className="space-y-4">
+                  <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                    {step.headline}
+                  </h2>
+                  <p className="text-sm sm:text-lg text-slate-200 leading-relaxed font-sans bg-polar-950/80 p-6 rounded-2xl border border-polar-800 shadow-inner">
+                    {step.content}
+                  </p>
                 </div>
-                <p className="text-sm font-bold text-white">{connectedQuiz.question}</p>
-                <div className="space-y-2 pt-2">
-                  {connectedQuiz.options.map((opt) => {
-                    const isSelected = quizAnswerSelected === opt.id;
-                    return (
-                      <button
-                        key={opt.id}
-                        onClick={() => {
-                          setQuizAnswerSelected(opt.id);
-                          recordAnswer(connectedQuiz.id, opt.isCorrect, connectedQuiz.topic, connectedQuiz.badgeRewardId);
-                        }}
-                        className={`w-full text-left p-3 rounded-lg text-xs font-medium border transition-all ${
-                          isSelected
-                            ? opt.isCorrect
-                              ? 'bg-emerald-950/80 border-emerald-500 text-emerald-200'
-                              : 'bg-rose-950/80 border-rose-500 text-rose-200'
-                            : 'bg-polar-900 border-polar-800 text-slate-300 hover:bg-polar-850'
-                        }`}
-                      >
-                        {opt.text}
-                      </button>
-                    );
-                  })}
-                </div>
-                {quizAnswerSelected && (
-                  <div className="p-3 rounded-lg bg-polar-900 border border-polar-800 text-xs text-slate-200">
-                    <span className="font-mono font-bold text-teal-400">Explanation: </span>
-                    <span>{connectedQuiz.whyExplanation}</span>
+
+                {/* Embedded Visualizer during Step 2 and 3 ("You have now reached the evidence") */}
+                {(step.stepNumber === 2 || step.stepNumber === 3) && (
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center gap-2 text-xs font-mono font-bold text-teal-300 uppercase tracking-widest">
+                      <BarChart2 className="w-4 h-4 text-teal-400" />
+                      <span>Scientific Evidence · Grounded Time Series</span>
+                    </div>
+                    <DataVisualizer datasetKey={story.timeSeriesKey} title={story.title} />
                   </div>
                 )}
-              </div>
-            )}
 
-            {/* Provenance Card in Step 8 */}
-            {step.stepNumber === 8 && (
-              <div className="space-y-3">
-                <ProvenanceBadge provenance={story.provenance} />
-              </div>
-            )}
-          </div>
+                {/* Reflection Question in Step 4 */}
+                {step.stepNumber === 4 && step.interactiveOptions && (
+                  <div className="space-y-4 p-6 rounded-2xl bg-polar-950 border border-ice-500/30 shadow-xl">
+                    <div className="flex items-center gap-2 text-xs font-mono font-bold text-ice-400 uppercase tracking-widest">
+                      <HelpCircle className="w-4 h-4" />
+                      <span>Scientific Observation Check</span>
+                    </div>
+                    <p className="text-sm sm:text-base font-bold text-white">{step.promptQuestion}</p>
+                    <div className="space-y-2.5 pt-1">
+                      {step.interactiveOptions.map((opt) => {
+                        const isSelected = selectedOptionId === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => setSelectedOptionId(opt.id)}
+                            className={`w-full text-left p-4 rounded-xl text-xs sm:text-sm font-medium border transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-polar-850 border-ice-400 text-white font-semibold shadow-md ring-1 ring-ice-400/30'
+                                : 'bg-polar-900 border-polar-800 text-slate-300 hover:bg-polar-850 hover:text-white'
+                            }`}
+                          >
+                            {opt.text}
+                          </button>
+                        );
+                      })}
+                    </div>
 
-          {/* Navigation Controls */}
-          <div className="flex items-center justify-between pt-6 border-t border-polar-800 font-mono text-xs">
-            <button
-              onClick={handlePrevStep}
-              disabled={currentStepIndex === 0}
-              className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all ${
-                currentStepIndex === 0
-                  ? 'opacity-40 cursor-not-allowed bg-polar-950 text-slate-600'
-                  : 'bg-polar-950 hover:bg-polar-850 text-slate-300 border border-polar-800'
-              }`}
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Previous Step</span>
-            </button>
+                    {selectedOptionId && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-4 rounded-xl bg-polar-900 border border-teal-500/40 text-xs sm:text-sm text-teal-300 space-y-1"
+                      >
+                        <span className="font-bold font-mono text-teal-400">Mechanism Explanation: </span>
+                        <span>
+                          {step.interactiveOptions.find((o) => o.id === selectedOptionId)?.isCorrectReason}
+                        </span>
+                      </motion.div>
+                    )}
+                  </div>
+                )}
 
-            {currentStepIndex < totalSteps - 1 ? (
-              <button
-                onClick={handleNextStep}
-                className="px-5 py-2 rounded-lg bg-ice-500 hover:bg-ice-400 text-polar-950 font-bold flex items-center gap-2 transition-all shadow-sm cursor-pointer"
-              >
-                <span>Next: {story.steps[currentStepIndex + 1]?.phaseTitle}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            ) : (
-              <button
-                onClick={() => onNavigate(isStudent ? 'quiz' : 'data', story.datasetId)}
-                className="px-5 py-2 rounded-lg bg-teal-500 hover:bg-teal-400 text-polar-950 font-bold flex items-center gap-2 transition-all shadow-sm cursor-pointer"
-              >
-                <span>{isStudent ? 'Take Polar Quiz Challenge 🏆' : 'Inspect Raw Datasets & DOIs 📊'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            )}
+                {/* Scientific Insight Box (Field Notebook Entry Style) */}
+                <div className="p-5 rounded-2xl bg-polar-950/90 border border-polar-750 text-xs sm:text-sm text-slate-300 flex items-start gap-3.5 shadow-md">
+                  <div className="p-2 rounded-xl bg-teal-500/15 border border-teal-400/30 text-teal-300 shrink-0">
+                    <Zap className="w-4 h-4" />
+                  </div>
+                  <div className="space-y-1">
+                    <strong className="text-white block font-mono uppercase tracking-wider text-xs">
+                      Governing Scientific Principle
+                    </strong>
+                    <p className="text-slate-300 leading-relaxed">{step.scientificInsight}</p>
+                  </div>
+                </div>
+
+                {/* Supporting Peer-Reviewed Paper Card in Step 6 */}
+                {step.stepNumber === 6 && connectedPaper && (
+                  <div className="p-6 rounded-2xl bg-polar-950 border border-polar-750 space-y-4 shadow-xl">
+                    <div className="flex items-center justify-between border-b border-polar-800 pb-3">
+                      <span className="text-xs font-mono font-bold text-teal-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <FileText className="w-4 h-4" /> Grounding Peer-Reviewed Publication
+                      </span>
+                      <span className="text-2xs font-mono text-ice-300">DOI: {connectedPaper.doi}</span>
+                    </div>
+                    <h3 className="text-base sm:text-xl font-extrabold text-white leading-snug">
+                      {connectedPaper.title}
+                    </h3>
+                    <div className="text-xs font-mono text-slate-400">
+                      {connectedPaper.authors.join(', ')} ({connectedPaper.year}) • <em>{connectedPaper.journal}</em>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-300 bg-polar-900 p-4 rounded-xl border border-polar-800 leading-relaxed font-sans">
+                      {connectedPaper.abstract}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate('research', connectedPaper.id)}
+                      className="px-4 py-2.5 rounded-xl bg-ice-400 hover:bg-ice-300 text-polar-950 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all shadow-sm"
+                    >
+                      <span>Read full publication in Research Archive</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Interactive Quiz Check in Step 7 */}
+                {step.stepNumber === 7 && connectedQuiz && (
+                  <div className="p-6 rounded-2xl bg-polar-950 border border-amber-500/40 space-y-4 shadow-xl">
+                    <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-400 uppercase tracking-widest">
+                      <Award className="w-4 h-4" />
+                      <span>Story Comprehension Assessment</span>
+                    </div>
+                    <p className="text-base font-bold text-white">{connectedQuiz.question}</p>
+                    <div className="space-y-2.5 pt-1">
+                      {connectedQuiz.options.map((opt) => {
+                        const isSelected = quizAnswerSelected === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => {
+                              setQuizAnswerSelected(opt.id);
+                              recordAnswer(connectedQuiz.id, opt.isCorrect, connectedQuiz.topic, connectedQuiz.badgeRewardId);
+                            }}
+                            className={`w-full text-left p-4 rounded-xl text-xs sm:text-sm font-medium border transition-all cursor-pointer ${
+                              isSelected
+                                ? opt.isCorrect
+                                  ? 'bg-emerald-950/80 border-emerald-500 text-emerald-200 shadow-md'
+                                  : 'bg-rose-950/80 border-rose-500 text-rose-200 shadow-md'
+                                : 'bg-polar-900 border-polar-800 text-slate-300 hover:bg-polar-850 hover:text-white'
+                            }`}
+                          >
+                            {opt.text}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {quizAnswerSelected && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-4 rounded-xl bg-polar-900 border border-polar-800 text-xs sm:text-sm text-slate-200 space-y-1"
+                      >
+                        <span className="font-mono font-bold text-teal-400">Explanation: </span>
+                        <span>{connectedQuiz.whyExplanation}</span>
+                      </motion.div>
+                    )}
+                  </div>
+                )}
+
+                {/* Provenance Card in Step 8 */}
+                {step.stepNumber === 8 && (
+                  <div className="space-y-3 pt-2">
+                    <ProvenanceBadge provenance={story.provenance} />
+                  </div>
+                )}
+
+                {/* TACTILE NAVIGATION CONTROLS */}
+                <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-polar-800 font-mono text-xs">
+                  <button
+                    type="button"
+                    onClick={handlePrevStep}
+                    disabled={currentStepIndex === 0}
+                    className={`px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition-all cursor-pointer ${
+                      currentStepIndex === 0
+                        ? 'opacity-30 cursor-not-allowed bg-polar-950 text-slate-600 border border-polar-850'
+                        : 'bg-polar-950 hover:bg-polar-850 text-slate-300 border border-polar-750 hover:text-white'
+                    }`}
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Previous Step</span>
+                  </button>
+
+                  {currentStepIndex < totalSteps - 1 ? (
+                    <button
+                      type="button"
+                      onClick={handleNextStep}
+                      className="px-6 py-3 rounded-xl bg-ice-400 hover:bg-ice-300 text-polar-950 font-extrabold flex items-center gap-2 transition-all shadow-lg cursor-pointer"
+                    >
+                      <span>Next Phase: {story.steps[currentStepIndex + 1]?.phaseTitle}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onNavigate('data', story.datasetId)}
+                      className="px-6 py-3 rounded-xl bg-teal-400 hover:bg-teal-300 text-polar-950 font-extrabold flex items-center gap-2 transition-all shadow-lg cursor-pointer"
+                    >
+                      <span>Inspect Telemetry & DOIs 📊</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+              </motion.div>
+            </AnimatePresence>
+
           </div>
         </div>
+
       </div>
-    </div>
+    </LearningEnvironment>
   );
 };

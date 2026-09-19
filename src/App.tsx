@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { AudienceProvider } from './context/AudienceContext';
+import React, { useState, useEffect } from 'react';
 import { QuizProvider } from './context/QuizContext';
 import { AdminProvider } from './context/AdminContext';
 import { Navbar, NavTab } from './components/layout/Navbar';
@@ -21,6 +20,7 @@ import { IndiaPolarJourney } from './components/india/IndiaPolarJourney';
 import { PolarLife } from './components/biodiversity/PolarLife';
 import { MediaGallery } from './components/media/MediaGallery';
 import { AdminCuration } from './components/admin/AdminCuration';
+import { ImmersiveScrollJourney } from './components/visual/ImmersiveScrollJourney';
 import { PolarTopic } from './types/polar';
 
 const AppContent: React.FC = () => {
@@ -28,6 +28,17 @@ const AppContent: React.FC = () => {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [targetDetailId, setTargetDetailId] = useState<string | undefined>(undefined);
   const [targetTopicFilter, setTargetTopicFilter] = useState<PolarTopic | undefined>(undefined);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchModalOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleNavigate = (tab: NavTab, detailId?: string) => {
     setCurrentTab(tab);
@@ -53,11 +64,11 @@ const AppContent: React.FC = () => {
       {/* Main Routed Content */}
       <main className="flex-1 w-full">
         {currentTab === 'home' && (
-          <div>
+          <ImmersiveScrollJourney>
             <HeroSection onSelectTab={handleNavigate} />
             <PolarTopicGrid onSelectTopic={handleSelectTopicFromHome} onNavigate={handleNavigate} />
             <IndiaPolarBanner onNavigate={handleNavigate} />
-          </div>
+          </ImmersiveScrollJourney>
         )}
 
         {currentTab === 'explore' && (
@@ -124,13 +135,11 @@ const AppContent: React.FC = () => {
 
 export function App() {
   return (
-    <AudienceProvider>
-      <QuizProvider>
-        <AdminProvider>
-          <AppContent />
-        </AdminProvider>
-      </QuizProvider>
-    </AudienceProvider>
+    <QuizProvider>
+      <AdminProvider>
+        <AppContent />
+      </AdminProvider>
+    </QuizProvider>
   );
 }
 

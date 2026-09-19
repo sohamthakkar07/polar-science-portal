@@ -15,14 +15,15 @@ import {
   Layers,
   FileText,
   Sparkles,
-  Info
+  Info,
+  Zap,
+  ArrowRight
 } from 'lucide-react';
 import { PolarDataset } from '../../types/polar';
 import { DataVisualizer } from './DataVisualizer';
 import { ProvenanceBadge } from '../layout/ProvenanceBadge';
 import { RESEARCH_PAPERS } from '../../data/researchPapers';
 import { RESEARCH_STATIONS } from '../../data/stations';
-import { useAudience } from '../../context/AudienceContext';
 import { AdaptiveExplanation } from '../layout/AdaptiveExplanation';
 import { NavTab } from '../layout/Navbar';
 
@@ -35,7 +36,6 @@ interface DatasetDetailProps {
 type DetailTab = 'overview' | 'tech-specs' | 'citations';
 
 export const DatasetDetail: React.FC<DatasetDetailProps> = ({ dataset, onBack, onNavigate }) => {
-  const { isStudent } = useAudience();
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const [copiedCitation, setCopiedCitation] = useState(false);
 
@@ -64,7 +64,7 @@ export const DatasetDetail: React.FC<DatasetDetailProps> = ({ dataset, onBack, o
         {/* Navigation Breadcrumb */}
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-ice-300 hover:text-white transition-colors bg-polar-900 px-3.5 py-2 rounded-xl border border-polar-800 cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs font-mono font-bold text-ice-300 hover:text-white transition-colors bg-polar-900 px-4 py-2.5 rounded-xl border border-polar-800 cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Data Catalog</span>
@@ -73,18 +73,18 @@ export const DatasetDetail: React.FC<DatasetDetailProps> = ({ dataset, onBack, o
         {/* Dataset Header */}
         <div className="space-y-4 border-b border-polar-800 pb-6">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-ice-500/20 border border-ice-400/40 text-ice-300">
+            <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-ice-500/20 border border-ice-400/40 text-ice-300">
               {dataset.topic}
             </span>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-polar-850 border border-polar-750 text-slate-300">
+            <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-polar-850 border border-polar-750 text-slate-300">
               {dataset.region}
             </span>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-emerald-950/80 border border-emerald-500/40 text-emerald-300">
+            <span className="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-950/80 border border-emerald-500/40 text-emerald-300">
               {dataset.provenance.accessStatus}
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
             {dataset.title}
           </h1>
 
@@ -107,7 +107,7 @@ export const DatasetDetail: React.FC<DatasetDetailProps> = ({ dataset, onBack, o
             onClick={() => setActiveTab('overview')}
             className={`px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'overview'
-                ? 'bg-ice-500 text-polar-950 shadow-sm'
+                ? 'bg-ice-400 text-polar-950 shadow-md'
                 : 'text-slate-400 hover:text-white hover:bg-polar-900'
             }`}
           >
@@ -119,7 +119,7 @@ export const DatasetDetail: React.FC<DatasetDetailProps> = ({ dataset, onBack, o
             onClick={() => setActiveTab('tech-specs')}
             className={`px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'tech-specs'
-                ? 'bg-ice-500 text-polar-950 shadow-sm'
+                ? 'bg-ice-400 text-polar-950 shadow-md'
                 : 'text-slate-400 hover:text-white hover:bg-polar-900'
             }`}
           >
@@ -131,7 +131,7 @@ export const DatasetDetail: React.FC<DatasetDetailProps> = ({ dataset, onBack, o
             onClick={() => setActiveTab('citations')}
             className={`px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'citations'
-                ? 'bg-ice-500 text-polar-950 shadow-sm'
+                ? 'bg-ice-400 text-polar-950 shadow-md'
                 : 'text-slate-400 hover:text-white hover:bg-polar-900'
             }`}
           >
@@ -152,13 +152,13 @@ export const DatasetDetail: React.FC<DatasetDetailProps> = ({ dataset, onBack, o
               topicTitle={dataset.shortTitle}
             />
 
-            {/* Interactive Time Series Visualization */}
+            {/* Interactive Time Series Visualization (Hero Focal Object) */}
             {dataset.timeSeriesKey && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                     <Database className="w-4 h-4 text-ice-400" />
-                    <span>Interactive Scientific Visualization</span>
+                    <span>Primary Observational Data Visualization</span>
                   </h2>
                   <span className="text-2xs font-mono text-teal-400">
                     Source: {dataset.provenance.sourceOrgShort}
@@ -175,27 +175,54 @@ export const DatasetDetail: React.FC<DatasetDetailProps> = ({ dataset, onBack, o
 
             {/* Related Research Stations */}
             {relatedStations.length > 0 && (
-              <div className="p-6 rounded-2xl bg-polar-900 border border-polar-800 space-y-3">
+              <div className="p-6 rounded-3xl bg-polar-900 border border-polar-800 space-y-4 shadow-xl">
                 <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                  <Compass className="w-4 h-4 text-ice-400" /> Related Research Stations
+                  <Compass className="w-4 h-4 text-ice-400" /> Connected Observatories & Stations
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {relatedStations.map((s) => (
                     <div
                       key={s.id}
                       onClick={() => onNavigate('explore', s.id)}
-                      className="p-3.5 rounded-xl bg-polar-950 hover:bg-polar-850 border border-polar-800 cursor-pointer flex items-center justify-between transition-all"
+                      className="p-4 rounded-2xl bg-polar-950 hover:bg-polar-850 border border-polar-800 cursor-pointer flex items-center justify-between transition-all group"
                     >
                       <div>
-                        <div className="text-xs font-bold text-white">
+                        <div className="text-sm font-bold text-white group-hover:text-ice-300 transition-colors">
                           {s.isIndianStation && '🇮🇳 '}
                           {s.name}
                         </div>
-                        <div className="text-[11px] text-slate-400">{s.operator}</div>
+                        <div className="text-xs text-slate-400">{s.operator}</div>
                       </div>
-                      <span className="text-xs text-ice-300 font-mono font-semibold">View Map &rarr;</span>
+                      <span className="text-xs text-ice-300 font-mono font-semibold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                        <span>View Station</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </span>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Contextual Exploration Next Steps */}
+            {relatedPapers.length > 0 && (
+              <div className="p-6 rounded-3xl bg-gradient-to-r from-polar-900 to-polar-950 border border-teal-500/30 space-y-3 shadow-xl">
+                <div className="text-2xs font-mono font-bold uppercase tracking-widest text-teal-300 flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-teal-400" />
+                  <span>SCIENTIFIC KNOWLEDGE CONNECTION</span>
+                </div>
+                <h4 className="text-lg font-bold text-white">Read Peer-Reviewed Literature for this Observation</h4>
+                <p className="text-xs text-slate-300">
+                  Explore published research papers analyzing this observational dataset.
+                </p>
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('research', relatedPapers[0].id)}
+                    className="px-5 py-2.5 rounded-xl bg-teal-400 hover:bg-teal-300 text-polar-950 font-bold text-xs flex items-center gap-2 cursor-pointer shadow-md"
+                  >
+                    <span>Read Paper: {relatedPapers[0].title.slice(0, 45)}...</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             )}
@@ -205,15 +232,13 @@ export const DatasetDetail: React.FC<DatasetDetailProps> = ({ dataset, onBack, o
         {/* TAB 2: TECHNICAL SPECS */}
         {activeTab === 'tech-specs' && (
           <div className="space-y-8 animate-in fade-in duration-200">
-            {/* Student Mode Contextual Intro */}
-            {isStudent && (
-              <div className="p-4 rounded-xl bg-polar-900 border border-ice-500/30 text-xs text-slate-300 flex items-start gap-3">
-                <Info className="w-4 h-4 text-ice-400 shrink-0 mt-0.5" />
-                <span>
-                  <strong>Student Note:</strong> This section presents the exact NetCDF Climate and Forecast (CF) standard variable definitions, measurement units, and spatial bounding boxes used by climate researchers.
-                </span>
-              </div>
-            )}
+            {/* Contextual Technical Intro */}
+            <div className="p-4 rounded-xl bg-polar-900 border border-ice-500/30 text-xs text-slate-300 flex items-start gap-3">
+              <Info className="w-4 h-4 text-ice-400 shrink-0 mt-0.5" />
+              <span>
+                <strong>Technical Standard:</strong> This section presents the exact NetCDF Climate and Forecast (CF) standard variable definitions, measurement units, and spatial bounding boxes used by climate researchers.
+              </span>
+            </div>
 
             {/* NetCDF CF Measured Variables Table */}
             <div className="p-6 rounded-2xl bg-polar-900 border border-polar-800 space-y-4 shadow-xl">
@@ -317,7 +342,7 @@ export const DatasetDetail: React.FC<DatasetDetailProps> = ({ dataset, onBack, o
                         </span>
                         <span className="text-xs text-ice-400 group-hover:underline font-mono flex items-center gap-1">
                           <span>Inspect Literature</span>
-                          <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
+                          <ArrowRight className="w-3.5 h-3.5" />
                         </span>
                       </div>
                       <h4 className="text-sm font-bold text-white group-hover:text-ice-300 transition-colors">
@@ -343,8 +368,9 @@ export const DatasetDetail: React.FC<DatasetDetailProps> = ({ dataset, onBack, o
                   <span>Researcher Citation Generator (BibTeX)</span>
                 </h3>
                 <button
+                  type="button"
                   onClick={copyBibtex}
-                  className="px-3.5 py-2 rounded-xl bg-ice-500 hover:bg-ice-400 text-polar-950 font-mono text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                  className="px-3.5 py-2 rounded-xl bg-ice-400 hover:bg-ice-300 text-polar-950 font-mono text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
                 >
                   {copiedCitation ? <Check className="w-3.5 h-3.5 text-polar-950" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copiedCitation ? '✓ Copied!' : 'Copy BibTeX'}</span>
@@ -367,7 +393,7 @@ export const DatasetDetail: React.FC<DatasetDetailProps> = ({ dataset, onBack, o
                 href={dataset.provenance.originalSourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-5 py-2.5 rounded-xl bg-ice-500 hover:bg-ice-400 text-polar-950 font-bold text-xs flex items-center gap-2 transition-all shadow-sm whitespace-nowrap"
+                className="px-5 py-2.5 rounded-xl bg-ice-400 hover:bg-ice-300 text-polar-950 font-bold text-xs flex items-center gap-2 transition-all shadow-sm whitespace-nowrap"
               >
                 <span>Visit {dataset.provenance.sourceOrgShort} Portal</span>
                 <ExternalLink className="w-3.5 h-3.5" />

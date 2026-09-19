@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ArrowRight, Layers, ThermometerSnowflake, Globe2, Waves, Wind, Compass, Sparkles, BookOpen, ChevronRight } from 'lucide-react';
+import { ArrowRight, Layers, ThermometerSnowflake, Globe2, Waves, Wind, Compass, Sparkles, BookOpen, ChevronRight, Zap, Database, Activity } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { PolarTopic } from '../../types/polar';
 import { NavTab } from '../layout/Navbar';
 
@@ -15,16 +16,20 @@ interface TopicItem {
   stats: string;
   domain: string;
   icon: React.FC<{ className?: string }>;
+  mechanism: string;
+  accentBg: string;
 }
 
 const topics: TopicItem[] = [
   {
     id: 'Cryosphere',
-    title: 'Cryosphere & Sea Ice',
+    title: 'Cryosphere & Sea Ice Dynamics',
     tagline: 'Sea ice thermodynamics, ice sheet stability, permafrost thaw, and ice-albedo atmospheric feedback loops.',
     stats: '1979–2024 · NSIDC Record',
     domain: 'Antarctic & Arctic Oceans',
     icon: ThermometerSnowflake,
+    mechanism: 'Polar sea ice reflects 80%+ of solar radiation. Melting ice exposes dark ocean water, increasing heat absorption by 90%.',
+    accentBg: 'from-ice-900/60 via-polar-900 to-polar-950 border-ice-400/60'
   },
   {
     id: 'Climate',
@@ -33,14 +38,18 @@ const topics: TopicItem[] = [
     stats: '800,000-yr Ice Core · EPICA',
     domain: 'Global Polar Atmosphere',
     icon: Wind,
+    mechanism: 'Ice cores trap atmospheric bubbles across 800,000 years, providing pristine greenhouse gas concentrations over glacial cycles.',
+    accentBg: 'from-teal-900/60 via-polar-900 to-polar-950 border-teal-400/60'
   },
   {
     id: 'Ocean',
-    title: 'Polar Oceanography',
+    title: 'Polar Oceanography & Currents',
     tagline: 'Antarctic Circumpolar Current, deep ocean water formation, and Kongsfjorden Atlantic ocean water intrusions.',
     stats: 'Argo Floats · IndARC Observatory',
     domain: 'Southern & Arctic Ocean',
     icon: Waves,
+    mechanism: 'Freezing sea ice expels dense brine, forming Antarctic Bottom Water (AABW) which drives the global thermohaline conveyor.',
+    accentBg: 'from-cyan-900/60 via-polar-900 to-polar-950 border-cyan-400/60'
   },
   {
     id: 'Atmosphere',
@@ -49,156 +58,213 @@ const topics: TopicItem[] = [
     stats: 'Halley VI · Maitri Telemetry',
     domain: 'Antarctic & Arctic Stratosphere',
     icon: Layers,
+    mechanism: 'Extreme polar stratospheric clouds (PSCs) trigger catalytic chlorine activation during the dark polar spring night.',
+    accentBg: 'from-indigo-900/60 via-polar-900 to-polar-950 border-indigo-400/60'
   },
   {
     id: 'Polar Life',
-    title: 'Polar Biology & Ecology',
+    title: 'Polar Biology & Extremophiles',
     tagline: 'Emperor penguin fast-ice colonies, polar bear hunting ecology, microbial extremophiles, and krill biomass.',
     stats: 'SCAR · GBIF · OBIS Registry',
     domain: 'Southern & Arctic Ecosystems',
     icon: Globe2,
+    mechanism: 'Antarctic krill form the foundation of Southern Ocean food webs, sequestering gigatons of carbon into deep benthic sediments.',
+    accentBg: 'from-emerald-900/60 via-polar-900 to-polar-950 border-emerald-400/60'
   },
   {
     id: 'Remote Sensing',
-    title: 'Satellite Remote Sensing',
+    title: 'Satellite Lidar & Telemetry',
     tagline: 'ICESat-2 photon lidar, passive microwave radiometers, Sentinel SAR, and ISRO polar telemetry.',
-    stats: 'NASA Earthdata · ISRO Polar Ground',
+    stats: 'NASA Earthdata · ISRO Ground',
     domain: 'Orbital Telemetry / Global',
     icon: Sparkles,
+    mechanism: 'ICESat-2 fires 10,000 laser pulses per second to measure polar ice sheet elevation changes down to centimeter precision.',
+    accentBg: 'from-sky-900/60 via-polar-900 to-polar-950 border-sky-400/60'
   },
   {
     id: 'Glaciers',
-    title: 'Himalayan Glaciology',
+    title: 'Himalayan High-Altitude Glaciology',
     tagline: 'High-altitude Himalayan glacier mass balance, velocity mapping, terminus retreat, and supraglacial lakes.',
     stats: 'NCPOR Himansh · 4,080m Station',
     domain: 'Himalayas / Third Pole',
     icon: Compass,
+    mechanism: 'The Third Pole feeds Asia’s 10 major river systems; Himalayan glaciers exhibit distinct debris-cover melt dynamics.',
+    accentBg: 'from-orange-900/60 via-polar-900 to-polar-950 border-orange-400/60'
   },
   {
     id: 'Research',
-    title: 'Peer-Reviewed Research',
+    title: 'Peer-Reviewed DOIs & Literature',
     tagline: 'Open-access peer-reviewed literature, DOI registries, citations, and multi-institutional polar campaigns.',
     stats: 'Nature · JGR · Polar Science',
     domain: 'International Registries',
     icon: BookOpen,
+    mechanism: 'Grounded citation indices connect observational datasets directly with high-impact peer-reviewed literature.',
+    accentBg: 'from-purple-900/60 via-polar-900 to-polar-950 border-purple-400/60'
   },
 ];
 
 export const PolarTopicGrid: React.FC<PolarTopicGridProps> = ({ onSelectTopic, onNavigate }) => {
-  const [activeTopicId, setActiveTopicId] = useState<PolarTopic>(topics[0].id);
-  const activeTopic = topics.find(t => t.id === activeTopicId) || topics[0];
-  const ActiveIcon = activeTopic.icon;
+  const [featuredId, setFeaturedId] = useState<PolarTopic>(topics[0].id);
+  const featuredTopic = topics.find(t => t.id === featuredId) || topics[0];
+  const FeaturedIcon = featuredTopic.icon;
+
+  const supportingTopics = topics.filter(t => t.id !== featuredId);
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative">
-      {/* Section header */}
-      <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative" aria-label="Polar Topic Exploration">
+      {/* Section Header */}
+      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 border-l-2 border-ice-400 pl-4">
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="w-2 h-2 rounded-full bg-ice-400" aria-hidden="true" />
-            <span className="text-2xs font-mono font-semibold tracking-widest uppercase text-ice-400">
-              Scientific Core Domains
-            </span>
+          <div className="text-2xs font-mono font-bold uppercase tracking-widest text-ice-300">
+            STAGE 04 · SCIENTIFIC CORE DOMAINS
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-            Polar Science by Research Domain
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+            Explore Polar Disciplines
           </h2>
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mt-2 leading-relaxed">
+            Eight interconnected research domains bridging satellite telemetry, ice core archives, oceanographic moorings, and high-altitude Himalayan glaciology.
+          </p>
         </div>
+
         <button
-          onClick={() => onNavigate('learn')}
-          className="inline-flex items-center gap-2 text-xs font-mono text-ice-400 hover:text-ice-300 transition-colors bg-polar-900 border border-polar-800 hover:border-ice-500/40 px-4 py-2 rounded-lg"
+          type="button"
+          onClick={() => onNavigate('data')}
+          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-polar-900 hover:bg-polar-850 border border-polar-750 text-xs font-mono font-bold text-ice-300 hover:text-white transition-all cursor-pointer shrink-0 shadow-sm"
         >
-          <span>View All Educational Modules</span>
-          <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+          <span>View All 34 Datasets</span>
+          <ArrowRight className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Main Bento & Grid card container */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-polar-900/60 border border-polar-800 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-glass">
+      {/* ASYMMETRIC EDITORIAL LAYOUT */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-        {/* Left: Domain selectors (Bento list) */}
-        <div className="lg:col-span-5 grid grid-cols-1 gap-2 max-h-[500px] overflow-y-auto pr-1 no-scrollbar">
-          {topics.map((topic, idx) => {
-            const isActive = activeTopicId === topic.id;
-            const Icon = topic.icon;
-            return (
-              <button
-                key={topic.id}
-                onClick={() => setActiveTopicId(topic.id)}
-                className={`
-                  w-full text-left p-4 rounded-xl border transition-all duration-150 flex items-center justify-between gap-3 group
-                  ${isActive
-                    ? 'bg-polar-800 border-ice-500/50 shadow-inner'
-                    : 'bg-polar-950/60 border-polar-800/80 hover:bg-polar-850 hover:border-polar-750'
-                  }
-                `}
-                aria-pressed={isActive}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg border transition-colors ${isActive ? 'bg-ice-500/20 border-ice-400/40 text-ice-300' : 'bg-polar-900 border-polar-800 text-slate-400 group-hover:text-white'}`}>
-                    <Icon className="w-4 h-4" />
+        {/* LEFT COLUMN: LARGE FEATURED TOPIC SPOTLIGHT */}
+        <div className="lg:col-span-6 space-y-4">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={featuredTopic.id}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.3 }}
+              className={`bg-gradient-to-b ${featuredTopic.accentBg} rounded-3xl border p-8 shadow-2xl space-y-6 relative overflow-hidden flex flex-col justify-between`}
+              style={{ minHeight: '440px' }}
+            >
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-polar-950/80 border border-polar-750 text-teal-300 text-xs font-mono font-bold">
+                    <FeaturedIcon className="w-4 h-4 text-ice-400" />
+                    <span>{featuredTopic.domain}</span>
                   </div>
-                  <div>
-                    <div className={`text-xs font-bold transition-colors ${isActive ? 'text-white' : 'text-slate-300 group-hover:text-white'}`}>
-                      {topic.title}
-                    </div>
-                    <div className="text-[11px] text-slate-500 font-mono mt-0.5">{topic.domain}</div>
-                  </div>
+                  <span className="text-2xs font-mono text-slate-400 uppercase tracking-wider">
+                    FEATURED DOMAIN
+                  </span>
                 </div>
-                <ChevronRight className={`w-4 h-4 transition-transform ${isActive ? 'text-ice-400 translate-x-1' : 'text-slate-600 group-hover:text-slate-400'}`} />
-              </button>
-            );
-          })}
+
+                <h3 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+                  {featuredTopic.title}
+                </h3>
+
+                <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-normal">
+                  {featuredTopic.tagline}
+                </p>
+
+                {/* Key Mechanism Detail */}
+                <div className="p-4 rounded-2xl bg-polar-950/90 border border-polar-800 space-y-2">
+                  <div className="flex items-center gap-2 text-2xs font-mono font-bold text-ice-300 uppercase tracking-wider">
+                    <Zap className="w-4 h-4 text-teal-400" />
+                    <span>Scientific Mechanism</span>
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    {featuredTopic.mechanism}
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-polar-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-2xs font-mono text-slate-400">
+                  <span>Record: </span>
+                  <span className="text-white font-bold">{featuredTopic.stats}</span>
+                </div>
+
+                <motion.button
+                  type="button"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => onSelectTopic(featuredTopic.id)}
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-ice-400 hover:bg-ice-300 text-polar-950 font-bold text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all"
+                >
+                  <span>Explore {featuredTopic.id} Datasets</span>
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        {/* Right: Active domain preview panel */}
-        <div className="lg:col-span-7 bg-polar-950/80 border border-polar-800 rounded-xl p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden">
-          {/* Subtle grid accent background */}
-          <div className="absolute inset-0 bg-polar-grid opacity-30 pointer-events-none" />
-
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-polar-900 border border-ice-500/30 text-ice-300 text-2xs font-mono">
-                <ActiveIcon className="w-3.5 h-3.5" />
-                <span className="uppercase tracking-wider">{activeTopic.stats}</span>
-              </div>
-              <span className="text-2xs font-mono text-slate-500">PROVENANCE VERIFIED</span>
-            </div>
-
-            <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">
-              {activeTopic.title}
-            </h3>
-
-            <p className="text-sm text-slate-300 leading-relaxed mb-8 max-w-reading">
-              {activeTopic.tagline}
-            </p>
-
-            <div className="p-4 rounded-lg bg-polar-900/90 border border-polar-800 space-y-2 mb-8">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-mono text-slate-400">Primary Observatory:</span>
-                <span className="font-semibold text-slate-200">{activeTopic.domain}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-mono text-slate-400">Primary Focus:</span>
-                <span className="font-semibold text-teal-400">{activeTopic.stats}</span>
-              </div>
-            </div>
+        {/* RIGHT COLUMN: ASYMMETRIC SUPPORTING DOMAIN CARDS & STRIPES */}
+        <div className="lg:col-span-6 space-y-3">
+          <div className="text-2xs font-mono text-slate-400 font-bold uppercase tracking-wider mb-2">
+            SELECT A SCIENTIFIC DOMAIN TO FEATURE:
           </div>
 
-          <div className="relative z-10 flex flex-wrap items-center gap-4 pt-6 border-t border-polar-800">
-            <button
-              onClick={() => onSelectTopic(activeTopic.id)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-ice-500 hover:bg-ice-400 active:scale-[0.98] text-polar-950 font-bold text-xs rounded-lg transition-all shadow-sm cursor-pointer"
-            >
-              <span>Explore {activeTopic.title} Datasets</span>
-              <ArrowRight className="w-4 h-4" aria-hidden="true" />
-            </button>
-            <button
-              onClick={() => onNavigate('learn')}
-              className="text-xs font-mono text-slate-400 hover:text-white transition-colors"
-            >
-              Interactive Modules →
-            </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {topics.map((t) => {
+              const Icon = t.icon;
+              const isSelected = t.id === featuredId;
+
+              return (
+                <motion.div
+                  key={t.id}
+                  whileHover={{ y: -2 }}
+                  tabIndex={0}
+                  role="button"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setFeaturedId(t.id);
+                      onSelectTopic(t.id);
+                    }
+                  }}
+                  onClick={() => {
+                    setFeaturedId(t.id);
+                  }}
+                  className={`p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-3 group ${
+                    isSelected
+                      ? 'bg-polar-900 border-ice-400 ring-1 ring-ice-400/30 shadow-lg'
+                      : 'bg-polar-900/50 hover:bg-polar-850 border-polar-800 hover:border-polar-700'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-xl ${isSelected ? 'bg-ice-500/20 text-ice-300' : 'bg-polar-950 text-slate-400 group-hover:text-white'}`}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <h4 className="text-sm font-bold text-white group-hover:text-ice-300 transition-colors leading-snug">
+                        {t.id}
+                      </h4>
+                    </div>
+
+                    <span className="text-3xs font-mono px-2 py-0.5 rounded bg-polar-950 text-teal-400 border border-polar-800">
+                      {t.domain.split(' ')[0]}
+                    </span>
+                  </div>
+
+                  <p className="text-2xs text-slate-300 line-clamp-2 leading-relaxed">
+                    {t.tagline}
+                  </p>
+
+                  <div className="flex items-center justify-between text-3xs font-mono text-slate-400 pt-2 border-t border-polar-800/60">
+                    <span className="truncate max-w-[140px]">{t.stats.split('·')[0]}</span>
+                    <span className="text-ice-300 font-bold group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
+                      <span>View</span>
+                      <ChevronRight className="w-3 h-3" />
+                    </span>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
 

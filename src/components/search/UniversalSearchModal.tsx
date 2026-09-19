@@ -80,8 +80,8 @@ export const UniversalSearchModal: React.FC<UniversalSearchModalProps> = ({ isOp
       const entities: { label: string; tab: NavTab; id?: string }[] = [
         { label: '🔬 Technical Specs', tab: 'data', id: d.id }
       ];
-      if (d.connectedPaperIds && d.connectedPaperIds.length > 0) {
-        entities.push({ label: '📑 DOI Provenance', tab: 'research', id: d.connectedPaperIds[0] });
+      if (d.relatedPaperIds && d.relatedPaperIds.length > 0) {
+        entities.push({ label: '📑 DOI Provenance', tab: 'research', id: d.relatedPaperIds[0] });
       }
 
       items.push({

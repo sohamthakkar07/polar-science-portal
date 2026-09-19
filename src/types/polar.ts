@@ -132,6 +132,7 @@ export interface LearningModule {
   region: PolarRegion;
   readingTimeMinutes: number;
   coverImage: string;
+  imageGallery?: string[];
   imageCaption: string;
   eli15: {
     analogy: string;
@@ -237,6 +238,7 @@ export interface Species {
   coordinatesDistribution: { lat: number; lon: number; name: string }[];
   overview: string;
   imageUrl: string;
+  imageGallery?: string[];
   imageCredit: string;
   provenance: ProvenanceInfo;
 }

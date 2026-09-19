@@ -80,8 +80,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
               ].map(({ tab, label }) => (
                 <li key={tab}>
                   <button
+                    type="button"
                     onClick={() => onSelectTab(tab)}
-                    className="text-xs text-slate-400 hover:text-ice-300 transition-colors flex items-center gap-1.5"
+                    className="text-xs text-slate-400 hover:text-ice-300 transition-colors flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ice-400 rounded px-1"
                   >
                     <span className="w-1 h-1 rounded-full bg-ice-500/60" />
                     <span>{label}</span>
@@ -104,8 +105,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
               ].map(({ tab, label }) => (
                 <li key={tab}>
                   <button
+                    type="button"
                     onClick={() => onSelectTab(tab)}
-                    className="text-xs text-slate-400 hover:text-ice-300 transition-colors flex items-center gap-1.5"
+                    className="text-xs text-slate-400 hover:text-ice-300 transition-colors flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ice-400 rounded px-1"
                   >
                     <span className="w-1 h-1 rounded-full bg-teal-500/60" />
                     <span>{label}</span>

@@ -12,19 +12,17 @@ import {
   Sparkles,
   Compass,
   MapPin,
-  FileText,
   Flag,
   Trophy,
   ArrowRight
 } from 'lucide-react';
-import { NavTab } from '../layout/Navbar';
-import { useAudience } from '../../context/AudienceContext';
 import { RESEARCH_STATIONS } from '../../data/stations';
 import { POLAR_DATASETS } from '../../data/datasets';
 import { RESEARCH_PAPERS } from '../../data/researchPapers';
 import { POLAR_SPECIES } from '../../data/biodiversity';
 import { POLAR_EXPEDITIONS } from '../../data/expeditions';
 import { LEARNING_MODULES } from '../../data/learningModules';
+import { NavTab } from '../layout/Navbar';
 
 interface ChatMessage {
   id: string;
@@ -52,7 +50,6 @@ const suggestedPrompts = [
 ];
 
 export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
-  const { isStudent } = useAudience();
   const [inputQuery, setInputQuery] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -107,7 +104,7 @@ export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
       s.name.toLowerCase().includes(q) ||
       s.id.toLowerCase() === q ||
       (s.nativeName && s.nativeName.toLowerCase().includes(q)) ||
-      (q.includes('dakshin gangotri') && s.historicalSignificance.toLowerCase().includes('dakshin gangotri'))
+      (q.includes('dakshin gangotri') && Boolean(s.historicalSignificance?.toLowerCase().includes('dakshin gangotri')))
     );
 
     if (matchedStation) {
@@ -116,7 +113,7 @@ export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
         sender: 'assistant',
         text: `${matchedStation.name} is a ${matchedStation.status.toLowerCase()} research station located in ${matchedStation.subRegion} (${matchedStation.region}).`,
         simpleAnswer: matchedStation.overview,
-        scientificExplanation: `Established in ${matchedStation.establishedYear} at ${matchedStation.elevationMeters}m altitude. Climate: Avg Annual Temp ${matchedStation.climateSummary.avgAnnualTempC}°C (Record Min ${matchedStation.climateSummary.recordMinTempC}°C). Disciplines: ${matchedStation.scientificDisciplines.join(', ')}. ${matchedStation.historicalSignificance}`,
+        scientificExplanation: `Established in ${matchedStation.establishedYear} at ${matchedStation.elevationMeters}m altitude. Climate: Avg Annual Temp ${matchedStation.climateSummary.avgAnnualTempC}°C (Record Min ${matchedStation.climateSummary.recordMinTempC}°C). Disciplines: ${matchedStation.scientificDisciplines.join(', ')}. ${matchedStation.historicalSignificance || ''}`,
         relatedData: [
           { label: `Explore ${matchedStation.name} Station 🗺️`, tab: 'explore', id: matchedStation.id },
           { label: 'View In-Situ Datasets 📊', tab: 'data', id: matchedStation.connectedDatasetIds[0] },
@@ -170,10 +167,10 @@ export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
         sender: 'assistant',
         text: `${matchedDataset.title} — archived dataset by ${matchedDataset.provenance.sourceOrganization}.`,
         simpleAnswer: matchedDataset.studentSummary,
-        scientificExplanation: `${matchedDataset.description} Measured CF Variables: ${matchedDataset.variables.map(v => `${v.name} (${v.unit})`).join(', ')}. Spatial Bounding: [${matchedDataset.spatialCoverage.boundingBox.join(', ')}]. Resolution: ${matchedDataset.temporalCoverage.resolution}.`,
+        scientificExplanation: `${matchedDataset.description} Measured CF Variables: ${matchedDataset.variables.map(v => `${v.name} (${v.unit})`).join(', ')}. Spatial Bounding: ${matchedDataset.spatialBoundingBox ? `[${matchedDataset.spatialBoundingBox.southLat}°S, ${matchedDataset.spatialBoundingBox.northLat}°N]` : 'Global'}. Resolution: ${matchedDataset.temporalCoverage.resolution}.`,
         relatedData: [
           { label: 'Inspect Dataset & Visualization 📊', tab: 'data', id: matchedDataset.id },
-          { label: 'View Supporting Publication 📑', tab: 'research', id: matchedDataset.connectedPaperIds[0] }
+          { label: 'View Supporting Publication 📑', tab: 'research', id: matchedDataset.relatedPaperIds[0] }
         ],
         sourcesUsed: [
           { name: matchedDataset.provenance.sourceOrganization, org: matchedDataset.provenance.sourceOrgShort, url: matchedDataset.provenance.originalSourceUrl, doi: matchedDataset.provenance.doi }
@@ -194,7 +191,7 @@ export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
         id: `resp-${Date.now()}`,
         sender: 'assistant',
         text: `"${matchedPaper.title}" published in ${matchedPaper.journal} (${matchedPaper.year}) by ${matchedPaper.authors.join(', ')}.`,
-        simpleAnswer: `Key Finding: ${matchedPaper.keyFinding}`,
+        simpleAnswer: `Key Finding: ${matchedPaper.studentKeyFinding}`,
         scientificExplanation: matchedPaper.abstract,
         relatedData: [
           { label: 'View Research Literature 📑', tab: 'research', id: matchedPaper.id },
@@ -314,9 +311,9 @@ export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
           </div>
 
           <div className="px-3.5 py-2 rounded-xl bg-polar-900 border border-polar-800 text-2xs font-mono flex items-center gap-2 shrink-0">
-            <span className="text-slate-400 uppercase">Active Mode:</span>
-            <span className={`font-bold ${isStudent ? 'text-amber-300' : 'text-teal-300'}`}>
-              {isStudent ? 'Student Mode 🎓' : 'Researcher Mode 🔬'}
+            <span className="text-slate-400 uppercase">Verification Engine:</span>
+            <span className="font-bold text-ice-300">
+              Grounded AI Engine 🔬
             </span>
           </div>
         </div>
@@ -375,38 +372,26 @@ export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
 
               <p className="text-sm leading-relaxed text-slate-200 font-sans">{msg.text}</p>
 
-              {/* AUDIENCE-AWARE PRESENTATION */}
+              {/* UNIFIED DUAL PRESENTATION */}
               {msg.sender === 'assistant' && (
                 <div className="mt-4 space-y-4">
-                  {/* Student Mode 🎓 Emphasis */}
-                  {isStudent && msg.simpleAnswer && (
+                  {/* Intuitive Plain Language Summary */}
+                  {msg.simpleAnswer && (
                     <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1.5 font-sans">
                       <div className="text-2xs font-mono font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
-                        <span>🎓 Student Summary & Analogy:</span>
+                        <span>🎓 Plain Language Overview:</span>
                       </div>
                       <p className="text-xs text-slate-200 leading-relaxed">{msg.simpleAnswer}</p>
                     </div>
                   )}
 
-                  {/* Scientific Detail (Researcher Emphasis or Student Expandable) */}
+                  {/* Quantitative Scientific Explanation */}
                   {msg.scientificExplanation && (
-                    <div className={`p-4 rounded-xl border font-mono text-xs space-y-1.5 ${
-                      !isStudent
-                        ? 'bg-teal-950/40 border-teal-500/30 text-teal-100'
-                        : 'bg-polar-950 border-polar-800 text-slate-300'
-                    }`}>
+                    <div className="p-4 rounded-xl border border-teal-500/30 bg-teal-950/40 text-teal-100 font-mono text-xs space-y-1.5">
                       <div className="text-2xs font-bold uppercase tracking-wider text-teal-300 flex items-center gap-1.5">
                         <span>🔬 Quantitative Scientific Explanation:</span>
                       </div>
                       <p className="text-xs leading-relaxed">{msg.scientificExplanation}</p>
-                    </div>
-                  )}
-
-                  {/* Student Mode Backup if simpleAnswer wasn't available */}
-                  {!isStudent && msg.simpleAnswer && (
-                    <div className="p-3 rounded-lg bg-polar-950 border border-polar-800 text-2xs font-mono text-slate-400">
-                      <span className="font-bold text-slate-300">Plain Language Overview: </span>
-                      {msg.simpleAnswer}
                     </div>
                   )}
 

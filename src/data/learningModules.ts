@@ -9,6 +9,11 @@ export const LEARNING_MODULES: LearningModule[] = [
     region: 'Antarctic',
     readingTimeMinutes: 7,
     coverImage: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    imageGallery: [
+      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80'
+    ],
     imageCaption: 'Sea ice floes drifting across the Southern Ocean off East Antarctica',
     eli15: {
       analogy: 'Think of an ice cube floating inside a full glass of water. When that ice cube melts, the water in the glass does NOT overflow, because the floating ice already displaced its own weight in liquid. That is Sea Ice. Now imagine throwing an ice cube from your freezer onto the top of the glass. The water immediately overflows. That is Land Ice (Glaciers & Ice Sheets)!',
@@ -59,6 +64,11 @@ export const LEARNING_MODULES: LearningModule[] = [
     region: 'Antarctic',
     readingTimeMinutes: 8,
     coverImage: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=1200&q=80',
+    imageGallery: [
+      'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80'
+    ],
     imageCaption: 'The stratosphere glowing above Halley VI Station in the Antarctic spring',
     eli15: {
       analogy: 'Imagine wearing a giant pair of sunglasses around the entire planet that blocks dangerous UV sunburn rays from blinding life on Earth. In the 1980s, chemicals from old aerosol hairsprays and refrigerators acted like acid dropping onto those sunglasses, eating a huge hole over Antarctica every spring.',
@@ -104,7 +114,12 @@ export const LEARNING_MODULES: LearningModule[] = [
     topic: 'Indian Polar Programme',
     region: 'Antarctic',
     readingTimeMinutes: 9,
-    coverImage: 'https://images.unsplash.com/photo-1548685913-fe6574346a23?auto=format&fit=crop&w=1200&q=80',
+    coverImage: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1200&q=80',
+    imageGallery: [
+      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80'
+    ],
     imageCaption: 'Bharati Station in the Larsemann Hills, Princess Elizabeth Land, East Antarctica',
     eli15: {
       analogy: 'Imagine a triangle connecting the South Pole (Antarctica), the North Pole (Arctic), and the highest mountains on Earth (Himalayas). India is one of the few nations on Earth with active, permanent research bases on all three corners of this planetary ice triangle!',
@@ -151,6 +166,11 @@ export const LEARNING_MODULES: LearningModule[] = [
     region: 'Global Ocean',
     readingTimeMinutes: 7,
     coverImage: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
+    imageGallery: [
+      'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80'
+    ],
     imageCaption: 'The turbulent waters of the Antarctic Circumpolar Current in the Drake Passage',
     eli15: {
       analogy: 'Think of Earth as a giant house and the Southern Ocean as a massive air-conditioner and vacuum cleaner combined. It vacuums up 75% of all the excess heat and 40% of all the carbon dioxide produced by human industry, storing it deep down where it cannot heat the air right now.',
