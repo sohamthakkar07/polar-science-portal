@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pymupdf
+pandas
+sentence-transformers
+chromadb
+requests

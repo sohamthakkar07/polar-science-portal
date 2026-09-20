@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AudienceProvider } from './context/AudienceContext';
 import { QuizProvider } from './context/QuizContext';
 import { AdminProvider } from './context/AdminContext';
@@ -21,6 +21,7 @@ import { IndiaPolarJourney } from './components/india/IndiaPolarJourney';
 import { PolarLife } from './components/biodiversity/PolarLife';
 import { MediaGallery } from './components/media/MediaGallery';
 import { AdminCuration } from './components/admin/AdminCuration';
+import { ImmersiveScrollJourney } from './components/visual/ImmersiveScrollJourney';
 import { PolarTopic } from './types/polar';
 
 const AppContent: React.FC = () => {
@@ -28,6 +29,17 @@ const AppContent: React.FC = () => {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [targetDetailId, setTargetDetailId] = useState<string | undefined>(undefined);
   const [targetTopicFilter, setTargetTopicFilter] = useState<PolarTopic | undefined>(undefined);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchModalOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleNavigate = (tab: NavTab, detailId?: string) => {
     setCurrentTab(tab);
@@ -42,7 +54,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-polar-950 text-slate-200 flex flex-col font-sans">
+    <div className="min-h-screen bg-transparent text-slate-200 flex flex-col font-sans">
       {/* Top Navbar */}
       <Navbar
         currentTab={currentTab}
@@ -53,11 +65,11 @@ const AppContent: React.FC = () => {
       {/* Main Routed Content */}
       <main className="flex-1 w-full">
         {currentTab === 'home' && (
-          <div>
+          <ImmersiveScrollJourney>
             <HeroSection onSelectTab={handleNavigate} />
             <PolarTopicGrid onSelectTopic={handleSelectTopicFromHome} onNavigate={handleNavigate} />
             <IndiaPolarBanner onNavigate={handleNavigate} />
-          </div>
+          </ImmersiveScrollJourney>
         )}
 
         {currentTab === 'explore' && (
@@ -82,10 +94,6 @@ const AppContent: React.FC = () => {
 
         {currentTab === 'quiz' && (
           <QuizCenter onNavigate={handleNavigate} initialQuestionId={targetDetailId} />
-        )}
-
-        {currentTab === 'ai' && (
-          <PolarAI onNavigate={handleNavigate} />
         )}
 
         {currentTab === 'research' && (
@@ -115,6 +123,9 @@ const AppContent: React.FC = () => {
         onClose={() => setSearchModalOpen(false)}
         onNavigate={handleNavigate}
       />
+
+      {/* Global AI Chatbot */}
+      <PolarAI onNavigate={handleNavigate} />
 
       {/* Provenance Guaranteed Footer */}
       <Footer onSelectTab={handleNavigate} />

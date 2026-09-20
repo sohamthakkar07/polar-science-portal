@@ -18,7 +18,7 @@ export const POLAR_DATASETS: PolarDataset[] = [
     temporalCoverage: {
       startDate: '1979-01-01',
       endDate: '2024-12-31',
-      resolution: 'Daily'
+      resolution: 'Daily' 
     },
     variables: [
       {

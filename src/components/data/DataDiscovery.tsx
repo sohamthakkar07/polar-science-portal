@@ -46,16 +46,6 @@ export const DataDiscovery: React.FC<DataDiscoveryProps> = ({
     [selectedDatasetId]
   );
 
-  if (activeDataset) {
-    return (
-      <DatasetDetail
-        dataset={activeDataset}
-        onBack={() => setSelectedDatasetId(null)}
-        onNavigate={onNavigate}
-      />
-    );
-  }
-
   const filteredDatasets = useMemo(() => {
     return POLAR_DATASETS.filter((d) => {
       if (topicFilter !== 'all' && d.topic !== topicFilter) return false;
@@ -95,6 +85,16 @@ export const DataDiscovery: React.FC<DataDiscoveryProps> = ({
     setSourceFilter('all');
     setSearchQuery('');
   };
+
+  if (activeDataset) {
+    return (
+      <DatasetDetail
+        dataset={activeDataset}
+        onBack={() => setSelectedDatasetId(null)}
+        onNavigate={onNavigate}
+      />
+    );
+  }
 
   return (
     <div className="w-full min-h-screen bg-polar-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8">

@@ -70,9 +70,10 @@ export default {
         'panel': '0 4px 16px 0 rgba(0,0,0,0.45)',
         'elevated': '0 12px 32px 0 rgba(0,0,0,0.55)',
         'inner-sm': 'inset 0 1px 2px 0 rgba(0,0,0,0.3)',
-        'ice-glow': '0 0 20px -3px rgba(82, 165, 215, 0.25)',
-        'teal-glow': '0 0 20px -3px rgba(66, 194, 177, 0.25)',
-        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        'ice-glow': '0 0 24px -4px rgba(82, 165, 215, 0.35)',
+        'teal-glow': '0 0 24px -4px rgba(66, 194, 177, 0.35)',
+        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37), 0 0 0 1px rgba(255, 255, 255, 0.08)',
+        'glow-inset': 'inset 0 0 20px rgba(82, 165, 215, 0.15), 0 0 15px rgba(82, 165, 215, 0.2)',
       },
       borderRadius: {
         'DEFAULT': '4px',
@@ -96,6 +97,20 @@ export default {
       transitionTimingFunction: {
         'ease-out-quad': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         'spring-subtle': 'cubic-bezier(0.16, 1, 0.3, 1)',
+      },
+      keyframes: {
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-5px)' },
+        },
+      },
+      animation: {
+        'shimmer': 'shimmer 3s linear infinite',
+        'float': 'float 4s ease-in-out infinite',
       },
     },
   },

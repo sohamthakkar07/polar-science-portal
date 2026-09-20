@@ -70,14 +70,14 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #060b14;
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #1b2f4f;
+    background: rgba(27, 47, 79, 0.5);
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #2b4775;
+    background: rgba(43, 71, 117, 0.8);
   }
 
   /* Tables */
@@ -128,8 +128,8 @@
 
   /* Ghost button */
   .btn-ghost {
-    @apply inline-flex items-center gap-2 px-4 py-2 border border-polar-800 
-           hover:border-polar-700 hover:bg-polar-900/60 text-slate-300 hover:text-white font-medium text-sm 
+    @apply inline-flex items-center gap-2 px-4 py-2 border border-transparent 
+           hover:border-polar-800 hover:bg-polar-900/60 text-slate-300 hover:text-white font-medium text-sm 
            rounded-md transition-all duration-150 cursor-pointer select-none;
   }
 
@@ -142,7 +142,7 @@
   /* Tag / Badge */
   .tag {
     @apply inline-flex items-center gap-1 px-2.5 py-0.5 text-2xs font-mono font-medium uppercase tracking-wider 
-           border border-polar-750 bg-polar-900/80 text-slate-300 rounded-sm;
+           border border-polar-750 bg-polar-900/80 text-slate-300 rounded-sm shadow-sm;
   }
 
   /* Scientific data table row */

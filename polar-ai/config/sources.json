@@ -1,0 +1,84 @@
+[
+    {
+        "name": "ncpor_about_us",
+        "organization": "NCPOR",
+        "type": "html",
+        "url": "https://ncpor.res.in/aboutus",
+        "enabled": true,
+        "destination": "knowledge/documents/ncpor_about_us.txt",
+        "description": "About the National Centre for Polar and Ocean Research"
+    },
+    {
+        "name": "ncpor_india_in_antarctica",
+        "organization": "NCPOR",
+        "type": "html",
+        "url": "https://ncpor.res.in/antarcticas/display/166-india-in-antarctica",
+        "enabled": true,
+        "destination": "knowledge/documents/ncpor_india_in_antarctica.txt",
+        "description": "Overview of India's Antarctic Programme"
+    },
+    {
+        "name": "ncpor_maitri_official",
+        "organization": "NCPOR",
+        "type": "html",
+        "url": "https://ncpor.res.in/antarcticas/display/376-maitri-",
+        "enabled": true,
+        "destination": "knowledge/documents/ncpor_maitri_official.txt",
+        "description": "Official information on Maitri station"
+    },
+    {
+        "name": "ncpor_bharati_official",
+        "organization": "NCPOR",
+        "type": "html",
+        "url": "https://ncpor.res.in/antarcticas/display/377-bharati",
+        "enabled": true,
+        "destination": "knowledge/documents/ncpor_bharati_official.txt",
+        "description": "Official information on Bharati station"
+    },
+    {
+        "name": "ncpor_science_in_antarctica",
+        "organization": "NCPOR",
+        "type": "html",
+        "url": "https://ncpor.res.in/antarcticas/display/386-science-in-antarctica",
+        "enabled": true,
+        "destination": "knowledge/documents/ncpor_science_in_antarctica.txt",
+        "description": "Science activities in Antarctica"
+    },
+    {
+        "name": "ncpor_india_in_arctic",
+        "organization": "NCPOR",
+        "type": "html",
+        "url": "https://ncpor.res.in/arctics",
+        "enabled": true,
+        "destination": "knowledge/documents/ncpor_india_in_arctic.txt",
+        "description": "Overview of India's Arctic Programme"
+    },
+    {
+        "name": "ncpor_himadri_official",
+        "organization": "NCPOR",
+        "type": "html",
+        "url": "https://ncpor.res.in/arctics/display/225-himadri",
+        "enabled": true,
+        "destination": "knowledge/documents/ncpor_himadri_official.txt",
+        "description": "Official information on Himadri station"
+    },
+    {
+        "name": "ncpor_science_in_arctic",
+        "organization": "NCPOR",
+        "type": "html",
+        "url": "https://ncpor.res.in/arctics/display/226-science",
+        "enabled": true,
+        "destination": "knowledge/documents/ncpor_science_in_arctic.txt",
+        "description": "Science activities in Arctic"
+    },
+    {
+        "name": "ncpor_himansh_official",
+        "organization": "NCPOR",
+        "type": "html",
+        "url": "https://ncpor.res.in/pages/display/268-himalaya",
+        "enabled": true,
+        "title": "Himansh Research Station, Himalaya",
+        "destination": "knowledge/documents/ncpor_himansh_official.txt",
+        "description": "Official information on Himansh high-altitude research station"
+    }
+]

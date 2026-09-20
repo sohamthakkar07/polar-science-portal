@@ -30,3 +30,24 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Python
+__pycache__/
+*.pyc
+
+# Local ChromaDB
+polar-ai/database/
+polar-ai/polar-ai/database/
+
+# Local development
+dev.pid
+
+# Local test/debug files
+test.cjs
+test_chart.py
+test_db.py
+test_db_doc.py
+test_himansh.py
+test_multi_source.py
+test_queries.py
+himalaya.html

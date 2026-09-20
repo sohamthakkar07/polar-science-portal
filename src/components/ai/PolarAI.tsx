@@ -15,16 +15,17 @@ import {
   FileText,
   Flag,
   Trophy,
-  ArrowRight
+  ArrowRight,
+  MessageSquare,
+  X as XIcon
 } from 'lucide-react';
+import {
+  LineChart, Line, BarChart, Bar, ScatterChart, Scatter,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
 import { NavTab } from '../layout/Navbar';
 import { useAudience } from '../../context/AudienceContext';
-import { RESEARCH_STATIONS } from '../../data/stations';
-import { POLAR_DATASETS } from '../../data/datasets';
-import { RESEARCH_PAPERS } from '../../data/researchPapers';
-import { POLAR_SPECIES } from '../../data/biodiversity';
-import { POLAR_EXPEDITIONS } from '../../data/expeditions';
-import { LEARNING_MODULES } from '../../data/learningModules';
+
 
 interface ChatMessage {
   id: string;
@@ -35,6 +36,7 @@ interface ChatMessage {
   relatedData?: { label: string; tab: NavTab; id?: string }[];
   sourcesUsed?: { name: string; org: string; url: string; doi?: string }[];
   isUngrounded?: boolean;
+  chart?: any;
 }
 
 interface PolarAIProps {
@@ -53,6 +55,7 @@ const suggestedPrompts = [
 
 export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
   const { isStudent } = useAudience();
+  const [isOpen, setIsOpen] = useState(false);
   const [inputQuery, setInputQuery] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -73,146 +76,7 @@ export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Dynamic In-Memory Knowledge Search Fallback
-  const searchGroundedKnowledge = (queryText: string): ChatMessage | null => {
-    const q = queryText.toLowerCase().trim();
-
-    // 1. Search Species (e.g., "penguin", "polar bear", "krill", "seal", "fox")
-    const matchedSpecies = POLAR_SPECIES.find((s) =>
-      s.commonName.toLowerCase().includes(q) ||
-      s.scientificName.toLowerCase().includes(q) ||
-      s.overview.toLowerCase().includes(q) ||
-      q.includes('penguin') && s.commonName.toLowerCase().includes('penguin')
-    );
-
-    if (matchedSpecies) {
-      return {
-        id: `resp-${Date.now()}`,
-        sender: 'assistant',
-        text: `${matchedSpecies.commonName} (${matchedSpecies.scientificName}) is an endemic ${matchedSpecies.region} ${matchedSpecies.group.toLowerCase()} species.`,
-        simpleAnswer: matchedSpecies.overview,
-        scientificExplanation: `Conservation Status: ${matchedSpecies.conservationStatus}. Estimated Population: ${matchedSpecies.estimatedPopulation}. Key Adaptations: ${matchedSpecies.adaptations.join('; ')}. Climate Vulnerability: ${matchedSpecies.climateVulnerability}`,
-        relatedData: [
-          { label: `Explore ${matchedSpecies.commonName} Wildlife 🐧`, tab: 'biodiversity', id: matchedSpecies.id },
-          { label: 'Learn: Marine Ecosystems Module 🎓', tab: 'learn', id: 'learn-polar-biology' }
-        ],
-        sourcesUsed: [
-          { name: matchedSpecies.provenance.sourceOrganization, org: matchedSpecies.provenance.sourceOrgShort, url: matchedSpecies.provenance.originalSourceUrl }
-        ]
-      };
-    }
-
-    // 2. Search Research Stations (e.g., "Himansh", "Dakshin Gangotri", "Maitri", "Bharati", "Himadri", "IndARC")
-    const matchedStation = RESEARCH_STATIONS.find((s) =>
-      s.name.toLowerCase().includes(q) ||
-      s.id.toLowerCase() === q ||
-      (s.nativeName && s.nativeName.toLowerCase().includes(q)) ||
-      (q.includes('dakshin gangotri') && s.historicalSignificance?.toLowerCase().includes('dakshin gangotri'))
-    );
-
-    if (matchedStation) {
-      return {
-        id: `resp-${Date.now()}`,
-        sender: 'assistant',
-        text: `${matchedStation.name} is a ${matchedStation.status.toLowerCase()} research station located in ${matchedStation.subRegion} (${matchedStation.region}).`,
-        simpleAnswer: matchedStation.overview,
-        scientificExplanation: `Established in ${matchedStation.establishedYear} at ${matchedStation.elevationMeters}m altitude. Climate: Avg Annual Temp ${matchedStation.climateSummary.avgAnnualTempC}°C (Record Min ${matchedStation.climateSummary.recordMinTempC}°C). Disciplines: ${matchedStation.scientificDisciplines.join(', ')}. ${matchedStation.historicalSignificance || ''}`,
-        relatedData: [
-          { label: `Explore ${matchedStation.name} Station 🗺️`, tab: 'explore', id: matchedStation.id },
-          { label: 'View In-Situ Datasets 📊', tab: 'data', id: matchedStation.connectedDatasetIds[0] },
-          { label: 'India’s Polar Journey 🇮🇳', tab: 'india', id: matchedStation.id }
-        ],
-        sourcesUsed: [
-          { name: matchedStation.provenance.sourceOrganization, org: matchedStation.provenance.sourceOrgShort, url: matchedStation.provenance.originalSourceUrl }
-        ]
-      };
-    }
-
-    // 3. Search Expeditions (e.g., "Dakshin Gangotri", "Qasim", "1981", "Operation Gangotri", "43rd expedition")
-    const matchedExpedition = POLAR_EXPEDITIONS.find((ex) =>
-      ex.name.toLowerCase().includes(q) ||
-      ex.leader.toLowerCase().includes(q) ||
-      ex.overview.toLowerCase().includes(q) ||
-      (q.includes('dakshin gangotri') && ex.name.toLowerCase().includes('dakshin gangotri'))
-    );
-
-    if (matchedExpedition) {
-      return {
-        id: `resp-${Date.now()}`,
-        sender: 'assistant',
-        text: `${matchedExpedition.name} (${matchedExpedition.yearStart}-${matchedExpedition.yearEnd}) led by ${matchedExpedition.leader}.`,
-        simpleAnswer: matchedExpedition.overview,
-        scientificExplanation: `Transport/Vessel: ${matchedExpedition.vesselOrTransport}. Key Achievements: ${matchedExpedition.keyDiscoveries.join('; ')}. Objectives: ${matchedExpedition.objectives.join('; ')}`,
-        relatedData: [
-          { label: 'Explore India’s Polar Journey 🇮🇳', tab: 'india', id: matchedExpedition.connectedStationIds[0] },
-          { label: 'Inspect Expedition Datasets 📊', tab: 'data', id: matchedExpedition.connectedDatasetIds[0] }
-        ],
-        sourcesUsed: [
-          { name: matchedExpedition.provenance.sourceOrganization, org: matchedExpedition.provenance.sourceOrgShort, url: matchedExpedition.provenance.originalSourceUrl }
-        ]
-      };
-    }
-
-    // 4. Search Datasets (e.g., "mass balance", "Prydz Bay", "glacier", "ozone", "CTD", "NetCDF")
-    const matchedDataset = POLAR_DATASETS.find((d) =>
-      d.title.toLowerCase().includes(q) ||
-      d.shortTitle.toLowerCase().includes(q) ||
-      d.description.toLowerCase().includes(q) ||
-      d.studentSummary.toLowerCase().includes(q) ||
-      d.variables.some((v) => v.name.toLowerCase().includes(q) || v.standardName.toLowerCase().includes(q) || v.description.toLowerCase().includes(q)) ||
-      (q.includes('mass balance') && d.id.includes('glaciers')) ||
-      (q.includes('prydz bay') && (d.title.toLowerCase().includes('bharati') || d.title.toLowerCase().includes('prydz')))
-    );
-
-    if (matchedDataset) {
-      const spatialDesc = matchedDataset.spatialBoundingBox
-        ? `[N:${matchedDataset.spatialBoundingBox.northLat}, S:${matchedDataset.spatialBoundingBox.southLat}, W:${matchedDataset.spatialBoundingBox.westLon}, E:${matchedDataset.spatialBoundingBox.eastLon}]`
-        : 'Global/Polar coverage';
-      return {
-        id: `resp-${Date.now()}`,
-        sender: 'assistant',
-        text: `${matchedDataset.title} — archived dataset by ${matchedDataset.provenance.sourceOrganization}.`,
-        simpleAnswer: matchedDataset.studentSummary,
-        scientificExplanation: `${matchedDataset.description} Measured CF Variables: ${matchedDataset.variables.map(v => `${v.name} (${v.unit})`).join(', ')}. Spatial Bounding: ${spatialDesc}. Resolution: ${matchedDataset.temporalCoverage.resolution}.`,
-        relatedData: [
-          { label: 'Inspect Dataset & Visualization 📊', tab: 'data', id: matchedDataset.id },
-          { label: 'View Supporting Publication 📑', tab: 'research', id: matchedDataset.relatedPaperIds?.[0] }
-        ],
-        sourcesUsed: [
-          { name: matchedDataset.provenance.sourceOrganization, org: matchedDataset.provenance.sourceOrgShort, url: matchedDataset.provenance.originalSourceUrl, doi: matchedDataset.provenance.doi }
-        ]
-      };
-    }
-
-    // 5. Search Research Papers
-    const matchedPaper = RESEARCH_PAPERS.find((p) =>
-      p.title.toLowerCase().includes(q) ||
-      p.abstract.toLowerCase().includes(q) ||
-      p.journal.toLowerCase().includes(q) ||
-      p.doi.toLowerCase() === q
-    );
-
-    if (matchedPaper) {
-      return {
-        id: `resp-${Date.now()}`,
-        sender: 'assistant',
-        text: `"${matchedPaper.title}" published in ${matchedPaper.journal} (${matchedPaper.year}) by ${matchedPaper.authors.join(', ')}.`,
-        simpleAnswer: `Key Finding: ${matchedPaper.studentKeyFinding}`,
-        scientificExplanation: matchedPaper.abstract,
-        relatedData: [
-          { label: 'View Research Literature 📑', tab: 'research', id: matchedPaper.id },
-          { label: 'Inspect Supporting Dataset 📊', tab: 'data', id: matchedPaper.connectedDatasetIds[0] }
-        ],
-        sourcesUsed: [
-          { name: matchedPaper.provenance.sourceOrganization, org: matchedPaper.provenance.sourceOrgShort, url: matchedPaper.provenance.originalSourceUrl, doi: matchedPaper.doi }
-        ]
-      };
-    }
-
-    return null;
-  };
-
-  const handleSendMessage = (queryText?: string) => {
+  const handleSendMessage = async (queryText?: string) => {
     const textToSend = queryText || inputQuery;
     if (!textToSend.trim() || isProcessing) return;
 
@@ -226,133 +90,129 @@ export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
     setInputQuery('');
     setIsProcessing(true);
 
-    setTimeout(() => {
-      const q = textToSend.toLowerCase();
-      let responseMsg: ChatMessage | null = null;
+    try {
+      const response = await fetch('/api/v1/polar-ai/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: textToSend,
+          mode: isStudent ? 'student' : 'researcher'
+        })
+      });
 
-      // Check hardcoded exact prompts first
-      if (q.includes('desert') || q.includes('precipitation') || q.includes('dry')) {
+      const data = await response.json();
+
+      let responseMsg: ChatMessage;
+
+      if (data.success) {
         responseMsg = {
           id: `resp-${Date.now()}`,
           sender: 'assistant',
-          text: 'Antarctica is officially the largest desert on Earth because deserts are defined strictly by annual precipitation (<250 mm/year). The Antarctic polar plateau receives under 50 mm annually — far less than the Sahara.',
-          simpleAnswer: 'Antarctica is so cold that air cannot hold moisture. Almost no new snow or rain falls in the interior, making it the driest and windiest continent on Earth.',
-          scientificExplanation: 'High atmospheric pressure over the South Pole creates a subsidence inversion. At −50°C, the saturation vapor pressure is virtually zero, preventing significant cloud condensation and snowfall.',
+          text: data.answer,
+          isUngrounded: data.isUngrounded,
           relatedData: [
-            { label: 'Explore Amundsen-Scott South Pole Station 🗺️', tab: 'explore', id: 'amundsen-scott' },
-            { label: 'Learn: Polar Cryosphere Module 🎓', tab: 'learn', id: 'learn-cryosphere-sea-ice' }
+            ...(data.relatedTopics || []).map((t: any) => ({ label: `Topic: ${t.label}`, tab: 'learn' as NavTab, id: t.id })),
+            ...(data.relatedDatasets || []).map((d: any) => ({ label: `Dataset: ${d.label}`, tab: 'data' as NavTab, id: d.id })),
+            ...(data.relatedStations || []).map((s: any) => ({ label: `Station: ${s.label}`, tab: 'explore' as NavTab, id: s.id })),
+            ...(data.relatedPapers || []).map((p: any) => ({ label: `Paper: ${p.label}`, tab: 'research' as NavTab, id: p.id }))
           ],
-          sourcesUsed: [
-            { name: 'NSIDC: Parts of the Cryosphere', org: 'NSIDC', url: 'https://nsidc.org/learn/parts-cryosphere/ice-sheets' },
-            { name: 'IPCC AR6 Working Group I', org: 'IPCC', url: 'https://www.ipcc.ch/' }
-          ]
+          sourcesUsed: data.sources,
+          chart: data.chart
         };
-      } else if (q.includes('2023') && (q.includes('sea ice') || q.includes('record low'))) {
+        
+        // Map simplified/scientific explanations if the backend provides them, 
+        // though our Gemini backend currently returns everything in `answer`.
+        // The UI handles rendering `text` directly.
+        if (isStudent && data.mode === 'student') {
+            responseMsg.simpleAnswer = "Generated explanation from PolarVerse Knowledge Base.";
+        } else if (!isStudent && data.mode === 'researcher') {
+            responseMsg.scientificExplanation = "Detailed research explanation from PolarVerse Knowledge Base.";
+        }
+
+      } else {
         responseMsg = {
           id: `resp-${Date.now()}`,
           sender: 'assistant',
-          text: 'In winter 2023, Antarctic sea ice extent reached an unprecedented all-time satellite low of 16.96 million km² — over 2.5 million km² below the 1981–2010 average (>5 standard deviations anomaly).',
-          simpleAnswer: 'Scientists found that warmer ocean water stored 200 meters below the surface mixed upward, preventing the ocean surface from freezing during the Antarctic winter.',
-          scientificExplanation: 'Argo profiling floats and atmospheric reanalyses demonstrated that subsurface warming in the Southern Ocean upper pycnocline, paired with strong circumpolar westerlies, precluded normal sea ice consolidation.',
-          relatedData: [
-            { label: 'NSIDC Sea Ice Index 📊', tab: 'data', id: 'nsidc-sea-ice-index' },
-            { label: 'Data Story: Tale of Two Poles 📖', tab: 'stories', id: 'sea-ice-dynamics-two-poles' }
-          ],
-          sourcesUsed: [
-            { name: 'Record Low Antarctic Sea Ice Cover in 2023', org: 'Communications Earth & Environment', url: 'https://doi.org/10.1038/s43247-023-00961-9', doi: '10.1038/s43247-023-00961-9' },
-            { name: 'NSIDC Sea Ice Index Version 3', org: 'NSIDC / NOAA', url: 'https://nsidc.org/data/g02135' }
-          ]
+          text: data.answer || data.error || 'Polar AI is temporarily unavailable. Please try again.',
+          isUngrounded: true
         };
       }
 
-      // If no static match, execute dynamic grounded knowledge search
-      if (!responseMsg) {
-        responseMsg = searchGroundedKnowledge(textToSend);
-      }
-
-      // Helpful Fallback for Zero Matches
-      if (!responseMsg) {
-        responseMsg = {
+      setMessages((prev) => [...prev, responseMsg]);
+    } catch (error) {
+      console.error('Error fetching chat response:', error);
+      const errorMsg: ChatMessage = {
           id: `resp-${Date.now()}`,
           sender: 'assistant',
-          text: `I couldn't find a verified match for "${textToSend}" in the current PolarVerse knowledge base.`,
-          simpleAnswer: 'To maintain strict scientific credibility, PolarVerse does not generate unverified claims.',
-          scientificExplanation: 'Try asking about Antarctic sea ice, Maitri/Bharati/Himadri stations, IndARC mooring in Kongsfjorden, ozone hole chemistry, penguins, Himansh, or Himalayan glacier mass balance.',
-          isUngrounded: true,
-          relatedData: [
-            { label: 'Search Stations 🗺️', tab: 'explore' },
-            { label: 'Browse Datasets 📊', tab: 'data' },
-            { label: 'Explore Research 📑', tab: 'research' },
-            { label: 'View Learning Modules 🎓', tab: 'learn' }
-          ],
-          sourcesUsed: [
-            { name: 'NCPOR National Polar Data Centre', org: 'NCPOR', url: 'https://npdc.ncpor.res.in/' },
-            { name: 'NSIDC Polar Knowledge Portal', org: 'NSIDC', url: 'https://nsidc.org/' }
-          ]
-        };
-      }
-
-      setMessages((prev) => [...prev, responseMsg!]);
+          text: 'Polar AI is temporarily unavailable. Please make sure the backend server is running.',
+          isUngrounded: true
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
       setIsProcessing(false);
-    }, 450);
+    }
   };
 
   return (
-    <div className="w-full min-h-screen bg-polar-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-
-        {/* Page header */}
-        <div className="border-b border-polar-800 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+      {/* Chat Window */}
+      <div 
+        className={`mb-4 w-[380px] sm:w-[450px] bg-polar-950 border border-polar-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 transform origin-bottom-right ${
+          isOpen ? 'scale-100 opacity-100 h-[600px] max-h-[75vh]' : 'scale-95 opacity-0 h-0 pointer-events-none'
+        }`}
+      >
+        {/* Header */}
+        <div className="p-4 bg-polar-900 border-b border-polar-800 flex items-center justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-md bg-polar-900 border border-ice-500/30 text-ice-300 text-2xs font-mono mb-3">
-              <Brain className="w-3.5 h-3.5" />
-              <span className="uppercase tracking-wider font-semibold">Grounded AI Research Assistant</span>
+            <div className="flex items-center gap-2">
+              <Brain className="w-4 h-4 text-ice-400" />
+              <h2 className="text-sm font-bold text-white tracking-tight">Polar AI Assistant</h2>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-              Polar Science Assistant
-            </h1>
-            <p className="text-sm text-slate-300 max-w-2xl mt-2 leading-relaxed">
-              Retrieval-augmented educational assistant grounded in peer-reviewed literature, NCPOR records, and satellite indices. Every answer cites verified DOIs.
-            </p>
+            <div className="text-3xs font-mono text-slate-400 mt-1 flex items-center gap-1.5">
+              <span>{isStudent ? 'Student Mode 🎓' : 'Researcher Mode 🔬'}</span>
+              <span>•</span>
+              <span className="text-teal-400 flex items-center gap-0.5"><ShieldCheck className="w-3 h-3"/> Grounded</span>
+            </div>
           </div>
-
-          <div className="px-3.5 py-2 rounded-xl bg-polar-900 border border-polar-800 text-2xs font-mono flex items-center gap-2 shrink-0">
-            <span className="text-slate-400 uppercase">Active Mode:</span>
-            <span className={`font-bold ${isStudent ? 'text-amber-300' : 'text-teal-300'}`}>
-              {isStudent ? 'Student Mode 🎓' : 'Researcher Mode 🔬'}
-            </span>
-          </div>
+          <button onClick={() => setIsOpen(false)} className="p-1.5 hover:bg-polar-800 rounded-lg text-slate-400 hover:text-white transition-colors">
+            <XIcon className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Suggested prompts */}
-        <div className="space-y-3">
-          <div className="text-2xs font-mono font-semibold uppercase tracking-widest text-slate-400">
-            Suggested Research Questions
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          
+          {/* Suggested prompts */}
+          <div className="space-y-2">
+            <div className="text-3xs font-mono font-semibold uppercase tracking-widest text-slate-500">
+              Suggested Research
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {suggestedPrompts.map((prompt, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSendMessage(prompt)}
+                  className="px-2 py-1 rounded bg-polar-900/80 hover:bg-polar-850 border border-polar-800 hover:border-ice-500/40 text-3xs font-mono text-slate-300 hover:text-white transition-all cursor-pointer text-left"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {suggestedPrompts.map((prompt, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSendMessage(prompt)}
-                className="px-3.5 py-2 rounded-xl bg-polar-900/80 hover:bg-polar-850 border border-polar-800 hover:border-ice-500/40 text-xs font-mono text-slate-300 hover:text-white transition-all cursor-pointer text-left"
+
+          {/* Chat Messages */}
+          <div className="space-y-4">
+            {messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`p-3 sm:p-4 rounded-xl border transition-all ${
+                  msg.sender === 'user'
+                    ? 'bg-polar-850 border-ice-500/30 text-white ml-6'
+                    : 'bg-polar-900/90 border-polar-800 text-slate-200'
+                }`}
               >
-                {prompt}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Chat Messages */}
-        <div className="space-y-4">
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`p-5 sm:p-6 rounded-2xl border transition-all ${
-                msg.sender === 'user'
-                  ? 'bg-polar-850 border-ice-500/30 text-white ml-6 sm:ml-12'
-                  : 'bg-polar-900/90 border-polar-800 text-slate-200 backdrop-blur-xl shadow-panel'
-              }`}
-            >
               <div className="flex items-center justify-between border-b border-polar-800/80 pb-3 mb-4">
                 <div className="flex items-center gap-2 font-mono text-xs">
                   {msg.sender === 'assistant' ? (
@@ -410,6 +270,51 @@ export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
                     <div className="p-3 rounded-lg bg-polar-950 border border-polar-800 text-2xs font-mono text-slate-400">
                       <span className="font-bold text-slate-300">Plain Language Overview: </span>
                       {msg.simpleAnswer}
+                    </div>
+                  )}
+
+                  {/* Chart Rendering Block */}
+                  {msg.chart && (
+                    <div className="p-4 rounded-xl border bg-polar-950/80 border-polar-800 mt-4 overflow-hidden">
+                      <div className="text-xs font-bold text-white mb-4 text-center">{msg.chart.title}</div>
+                      <div className="h-[250px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          {msg.chart.type === 'line' ? (
+                            <LineChart data={msg.chart.data} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                              <XAxis dataKey={msg.chart.xKey} stroke="#475569" fontSize={10} tickMargin={10} />
+                              <YAxis stroke="#475569" fontSize={10} domain={['auto', 'auto']} />
+                              <Tooltip contentStyle={{ backgroundColor: '#020617', borderColor: '#1e293b', fontSize: '12px' }} />
+                              <Legend wrapperStyle={{ fontSize: '10px' }} />
+                              {msg.chart.series.map((s: any, idx: number) => (
+                                <Line key={idx} type="monotone" dataKey={s.dataKey} name={s.label} stroke="#38bdf8" strokeWidth={2} dot={{ fill: '#38bdf8', r: 3 }} activeDot={{ r: 5 }} />
+                              ))}
+                            </LineChart>
+                          ) : msg.chart.type === 'bar' ? (
+                            <BarChart data={msg.chart.data} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                              <XAxis dataKey={msg.chart.xKey} stroke="#475569" fontSize={10} tickMargin={10} />
+                              <YAxis stroke="#475569" fontSize={10} domain={['auto', 'auto']} />
+                              <Tooltip contentStyle={{ backgroundColor: '#020617', borderColor: '#1e293b', fontSize: '12px' }} cursor={{fill: '#0f172a'}} />
+                              <Legend wrapperStyle={{ fontSize: '10px' }} />
+                              {msg.chart.series.map((s: any, idx: number) => (
+                                <Bar key={idx} dataKey={s.dataKey} name={s.label} fill="#38bdf8" radius={[4, 4, 0, 0]} />
+                              ))}
+                            </BarChart>
+                          ) : msg.chart.type === 'scatter' ? (
+                            <ScatterChart margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                              <XAxis dataKey={msg.chart.xKey} type="number" stroke="#475569" fontSize={10} domain={['auto', 'auto']} tickFormatter={(v) => v.toFixed(1)} />
+                              <YAxis dataKey={msg.chart.yKey} type="number" stroke="#475569" fontSize={10} domain={['auto', 'auto']} />
+                              <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#020617', borderColor: '#1e293b', fontSize: '12px' }} />
+                              <Legend wrapperStyle={{ fontSize: '10px' }} />
+                              {msg.chart.series.map((s: any, idx: number) => (
+                                <Scatter key={idx} name={s.label} data={msg.chart.data} fill="#38bdf8" />
+                              ))}
+                            </ScatterChart>
+                          ) : <></>}
+                        </ResponsiveContainer>
+                      </div>
                     </div>
                   )}
 
@@ -472,29 +377,43 @@ export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
 
           <div ref={messagesEndRef} />
         </div>
+        </div>
 
         {/* Input Bar */}
-        <div className="sticky bottom-6 bg-polar-900/90 border border-polar-800 p-3 rounded-2xl backdrop-blur-xl shadow-elevated flex items-center gap-3">
+        <div className="p-3 bg-polar-900 border-t border-polar-800 flex items-center gap-2">
           <input
             ref={inputRef}
             type="text"
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-            placeholder="Ask about Antarctic sea ice, penguins, Himansh, Maitri, or glacier mass balance..."
-            className="flex-1 bg-transparent px-3 text-xs font-mono text-white placeholder:text-slate-500 focus:outline-none"
+            placeholder="Ask a question..."
+            className="flex-1 bg-polar-950 border border-polar-800 rounded-lg px-3 py-2 text-xs font-sans text-white placeholder:text-slate-500 focus:outline-none focus:border-ice-500/50"
           />
           <button
             onClick={() => handleSendMessage()}
             disabled={!inputQuery.trim() || isProcessing}
-            className="px-4 py-2.5 bg-ice-500 hover:bg-ice-400 disabled:opacity-50 text-polar-950 font-bold text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+            className="p-2 bg-ice-500 hover:bg-ice-400 disabled:opacity-50 text-polar-950 font-bold rounded-lg transition-all shadow-sm flex items-center justify-center cursor-pointer"
           >
-            <span>Ask AI</span>
-            <Send className="w-3.5 h-3.5" />
+            <Send className="w-4 h-4" />
           </button>
         </div>
-
       </div>
+
+      {/* Floating Toggle Button */}
+      <button 
+        onClick={() => setIsOpen(!isOpen)} 
+        className="w-14 h-14 bg-ice-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.3)] hover:bg-ice-400 hover:scale-105 active:scale-95 transition-all text-polar-950 z-50 group"
+      >
+        {isOpen ? (
+          <XIcon className="w-6 h-6" />
+        ) : (
+          <div className="relative">
+             <Brain className="w-7 h-7" />
+             <div className="absolute -top-1 -right-1 w-3 h-3 bg-teal-400 rounded-full border-2 border-polar-950 animate-pulse"></div>
+          </div>
+        )}
+      </button>
     </div>
   );
 };
