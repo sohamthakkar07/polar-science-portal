@@ -35,7 +35,7 @@ export type NavTab =
   | 'media'
   | 'admin';
 
-export type PrimaryPillar = 'home' | 'explore' | 'learn' | 'research';
+export type PrimaryPillar = 'home' | 'explore' | 'learn' | 'research' | 'admin';
 
 interface NavbarProps {
   currentTab: NavTab;
@@ -53,7 +53,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onSelectTab, onOpenS
     if (tab === 'home') return 'home';
     if (['explore', 'india', 'media'].includes(tab)) return 'explore';
     if (['stories', 'learn', 'quiz', 'biodiversity'].includes(tab)) return 'learn';
-    return 'research'; // 'data', 'research', 'ai', 'admin'
+    if (tab === 'admin') return 'admin';
+    return 'research'; // 'data', 'research', 'ai'
   };
 
   const activePillar = getPillarForTab(currentTab);
@@ -82,7 +83,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onSelectTab, onOpenS
       { id: 'data', label: 'Scientific Datasets', icon: Database },
       { id: 'research', label: 'Research Literature (DOIs)', icon: BookOpen },
       { id: 'ai', label: 'Grounded AI Assistant', icon: Brain },
-    ]
+    ],
+    admin: []
   };
 
   const handleNavClick = (tab: NavTab) => {
@@ -99,7 +101,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onSelectTab, onOpenS
           <button
             type="button"
             onClick={() => handleNavClick('home')}
-            className="flex items-center gap-3 group focus-visible:outline-none text-left cursor-pointer"
+            className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-ice-500/50 focus-visible:ring-offset-4 focus-visible:ring-offset-polar-950 rounded-lg text-left cursor-pointer"
           >
             <div className="relative w-8 h-8 rounded-lg bg-polar-900 border border-ice-500/40 flex items-center justify-center overflow-hidden group-hover:border-ice-400 transition-colors shadow-inner">
               <div className="absolute inset-0 bg-gradient-to-br from-ice-500/20 via-transparent to-teal-500/10" />
@@ -131,10 +133,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onSelectTab, onOpenS
                   key={pillar.id}
                   type="button"
                   onClick={() => handleNavClick(pillar.defaultTab)}
-                  className={`px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+                  className={`px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer border focus:outline-none focus-visible:ring-2 focus-visible:ring-ice-500/50 ${
                     isPillarActive
-                      ? 'bg-polar-900 text-ice-300 border border-ice-500/40 shadow-sm'
-                      : 'text-slate-300 hover:text-white hover:bg-polar-900/60'
+                      ? 'bg-polar-900 text-ice-300 border-ice-500/40 shadow-sm'
+                      : 'text-slate-300 border-transparent hover:text-white hover:bg-polar-800/50'
                   }`}
                 >
                   <Icon className={`w-4 h-4 ${isPillarActive ? 'text-ice-400' : 'text-slate-400'}`} />
@@ -150,7 +152,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onSelectTab, onOpenS
             <button
               type="button"
               onClick={onOpenSearch}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-polar-900/90 border border-polar-800 hover:border-ice-500/40 text-slate-300 hover:text-white text-xs font-mono transition-all shadow-sm cursor-pointer"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-polar-900/90 border border-polar-800 hover:border-ice-500/40 text-slate-300 hover:text-white text-xs font-mono transition-all shadow-sm cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ice-500/50"
               title="Search datasets, DOIs, stations (Ctrl+K)"
             >
               <Search className="w-3.5 h-3.5 text-ice-400" />
@@ -177,7 +179,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onSelectTab, onOpenS
             <button
               type="button"
               onClick={() => handleNavClick('admin')}
-              className={`flex items-center gap-1.5 transition-colors px-2.5 py-1 rounded-lg text-2xs font-mono border ${
+              className={`flex items-center gap-1.5 transition-colors px-2.5 py-1 rounded-lg text-2xs font-mono border focus:outline-none focus-visible:ring-2 focus-visible:ring-ice-500/50 ${
                 currentTab === 'admin' ? 'text-ice-300 bg-polar-800 border-ice-500/40' : 'text-slate-400 hover:text-slate-200 border-polar-800'
               }`}
               title="Admin Curation Gateway"
@@ -190,7 +192,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onSelectTab, onOpenS
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-polar-900 border border-polar-800 focus:outline-none cursor-pointer"
+              className="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-polar-900 border border-polar-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-ice-500/50 cursor-pointer"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -212,10 +214,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onSelectTab, onOpenS
                   key={sub.id}
                   type="button"
                   onClick={() => handleNavClick(sub.id)}
-                  className={`flex items-center gap-1.5 py-1 transition-colors cursor-pointer ${
+                  className={`flex items-center gap-1.5 py-1 transition-colors cursor-pointer border-b focus:outline-none focus-visible:ring-2 focus-visible:ring-ice-500/50 ${
                     isSubActive
-                      ? 'text-ice-300 font-bold border-b border-ice-400'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'text-ice-300 font-bold border-ice-400'
+                      : 'text-slate-400 border-transparent hover:text-slate-200'
                   }`}
                 >
                   <SubIcon className={`w-3.5 h-3.5 ${isSubActive ? 'text-ice-400' : 'text-slate-400'}`} />
@@ -229,7 +231,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onSelectTab, onOpenS
 
       {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-polar-950 border-b border-polar-800 px-4 pt-3 pb-6 space-y-4 animate-in slide-in-from-top duration-200">
+        <div className="md:hidden absolute top-full left-0 w-full max-h-[calc(100vh-4rem)] overflow-y-auto shadow-2xl bg-polar-950 border-b border-polar-800 px-4 pt-3 pb-6 space-y-4 animate-in slide-in-from-top duration-200">
           <div className="space-y-1">
             {pillars.map((pillar) => {
               const Icon = pillar.icon;
@@ -240,10 +242,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onSelectTab, onOpenS
                   <button
                     type="button"
                     onClick={() => handleNavClick(pillar.defaultTab)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors border focus:outline-none focus-visible:ring-2 focus-visible:ring-ice-500/50 ${
                       isPillarActive
-                        ? 'bg-polar-900 text-ice-300 border border-ice-500/30'
-                        : 'text-slate-300 hover:bg-polar-900/60'
+                        ? 'bg-polar-900 text-ice-300 border-ice-500/30'
+                        : 'text-slate-300 border-transparent hover:bg-polar-800/50'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
@@ -264,10 +266,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onSelectTab, onOpenS
                             key={sub.id}
                             type="button"
                             onClick={() => handleNavClick(sub.id)}
-                            className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-mono transition-colors ${
+                            className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-mono transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ice-500/50 ${
                               isSubActive
                                 ? 'text-ice-300 font-bold bg-polar-900'
-                                : 'text-slate-400 hover:text-slate-200'
+                                : 'text-slate-400 hover:text-slate-200 hover:bg-polar-800/50'
                             }`}
                           >
                             <SubIcon className="w-3.5 h-3.5 text-slate-400" />

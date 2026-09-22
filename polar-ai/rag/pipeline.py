@@ -1,13 +1,20 @@
 from typing import List, Dict
 from llm.ollama_client import OllamaClient
+from llm.openrouter_client import OpenRouterClient
 from llm.prompts import SYSTEM_PROMPT
 from retrieval.vector_store import VectorStore
 from retrieval.embeddings import Embedder
 from analysis.dataset_profiler import DatasetProfiler
+import os
 
 class RAGPipeline:
     def __init__(self):
-        self.ollama = OllamaClient()
+        llm_provider = os.getenv("LLM_PROVIDER", "ollama").lower()
+        if llm_provider == "openrouter":
+            self.ollama = OpenRouterClient()
+        else:
+            self.ollama = OllamaClient()
+            
         self.embedder = Embedder()
         self.vector_store = VectorStore()
         self.profiler = DatasetProfiler(self.vector_store)

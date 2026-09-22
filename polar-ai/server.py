@@ -1,6 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
+import os
+from dotenv import load_dotenv
+
+# Navigate up one directory to load the root .env file
+env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
+load_dotenv(dotenv_path=env_path)
+
 from rag.pipeline import RAGPipeline
 
 app = FastAPI(title="Polar AI Local RAG Engine")
@@ -19,13 +26,16 @@ def chat_endpoint(req: ChatRequest):
         error_code = result.get("error")
         answer = result.get("answer", "")
         
-        # Check for local LLM unavailable based on the error code or standard ollama client error string
-        if error_code == "LOCAL_LLM_UNAVAILABLE" or "Could not connect to local Ollama" in answer:
+        # Check for LLM unavailable based on the error code or standard client error strings
+        if error_code == "LOCAL_LLM_UNAVAILABLE" or "Could not connect to local Ollama" in answer or str(answer).startswith("Error:"):
             from fastapi.responses import JSONResponse
+            
+            error_msg = answer if str(answer).startswith("Error:") else "PolarVerse AI is currently unavailable because the local Ollama server is not running."
+            
             return JSONResponse(status_code=503, content={
                 "success": False,
-                "error": "LOCAL_LLM_UNAVAILABLE",
-                "answer": "PolarVerse AI is currently unavailable because the local Ollama server is not running.",
+                "error": "LLM_PROVIDER_ERROR",
+                "answer": error_msg,
                 "sources": [],
                 "isUngrounded": True
             })

@@ -2,7 +2,11 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "ESNext",
     "skipLibCheck": true,
     "moduleResolution": "bundler",
@@ -15,8 +19,16 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "typeRoots": ["./node_modules/@types", "C:/Users/FestB/AppData/Local/Programs/Antigravity IDE/resources/app/node_modules/@types"],
-    "types": ["react", "react-dom"]
+    "typeRoots": [
+      "./node_modules/@types",
+      "C:/Users/FestB/AppData/Local/Programs/Antigravity IDE/resources/app/node_modules/@types"
+    ],
+    "types": [
+      "react",
+      "react-dom"
+    ]
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }
