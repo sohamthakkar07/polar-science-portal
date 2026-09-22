@@ -91,7 +91,8 @@ export const PolarAI: React.FC<PolarAIProps> = ({ onNavigate }) => {
     setIsProcessing(true);
 
     try {
-      const response = await fetch('/api/v1/polar-ai/chat', {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+      const response = await fetch(`${baseUrl}/api/v1/polar-ai/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

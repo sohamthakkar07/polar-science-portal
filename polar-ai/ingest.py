@@ -16,6 +16,12 @@ def ingest_all():
     embedder = Embedder()
     vector_store = VectorStore()
     
+    # Fast idempotency check
+    if vector_store.collection.count() > 0:
+        print(f"ChromaDB already has {vector_store.collection.count()} chunks. Skipping full ingestion to save boot time.")
+        return
+
+    
     docs_dir = "./knowledge/documents"
     datasets_dir = "./knowledge/datasets"
     

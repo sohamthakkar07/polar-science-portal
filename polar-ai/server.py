@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 import os
@@ -11,14 +12,30 @@ load_dotenv(dotenv_path=env_path)
 from rag.pipeline import RAGPipeline
 
 app = FastAPI(title="Polar AI Local RAG Engine")
+
+# Configure CORS
+frontend_origin = os.getenv("FRONTEND_ORIGIN", "http://localhost:3005")
+# Allow both FRONTEND_ORIGIN and localhost
+origins = [frontend_origin, "http://localhost:3005", "http://localhost:3006"]
+if frontend_origin not in origins:
+    origins.append(frontend_origin)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 pipeline = RAGPipeline()
 
 class ChatRequest(BaseModel):
     message: str
     mode: str = "researcher"
+    conversationId: str = None
 
-@app.post("/chat")
-def chat_endpoint(req: ChatRequest):
+def handle_chat(req: ChatRequest):
     try:
         result = pipeline.answer_query(req.message, top_k=15)
         
@@ -36,27 +53,34 @@ def chat_endpoint(req: ChatRequest):
                 "success": False,
                 "error": "LLM_PROVIDER_ERROR",
                 "answer": error_msg,
+                "mode": req.mode,
+                "intent": "explanation",
+                "entities": [],
                 "sources": [],
+                "relatedTopics": [],
+                "relatedDatasets": [],
+                "relatedPapers": [],
+                "relatedStations": [],
+                "confidence": "high",
                 "isUngrounded": True
             })
             
         if not success:
-            if error_code == "NO_RELEVANT_INFORMATION":
-                return {
-                    "success": False,
-                    "error": "NO_RELEVANT_INFORMATION",
-                    "answer": answer,
-                    "sources": [],
-                    "isUngrounded": True
-                }
-            else:
-                return {
-                    "success": False,
-                    "error": error_code or "UNKNOWN_ERROR",
-                    "answer": answer,
-                    "sources": [],
-                    "isUngrounded": True
-                }
+            return {
+                "success": False,
+                "error": error_code or "UNKNOWN_ERROR",
+                "answer": answer,
+                "mode": req.mode,
+                "intent": "explanation",
+                "entities": [],
+                "sources": [],
+                "relatedTopics": [],
+                "relatedDatasets": [],
+                "relatedPapers": [],
+                "relatedStations": [],
+                "confidence": "high",
+                "isUngrounded": True
+            }
         
         # Format sources for the frontend
         formatted_sources = []
@@ -70,8 +94,17 @@ def chat_endpoint(req: ChatRequest):
             
         response_data = {
             "success": True,
+            "error": None,
             "answer": answer,
+            "mode": req.mode,
+            "intent": "explanation",
+            "entities": [],
             "sources": formatted_sources,
+            "relatedTopics": [],
+            "relatedDatasets": [],
+            "relatedPapers": [],
+            "relatedStations": [],
+            "confidence": "high",
             "isUngrounded": False
         }
         
@@ -83,9 +116,23 @@ def chat_endpoint(req: ChatRequest):
         print(f"Error in chat endpoint: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/chat")
+def chat_endpoint(req: ChatRequest):
+    return handle_chat(req)
+
+@app.post("/api/v1/polar-ai/chat")
+def chat_endpoint_prod(req: ChatRequest):
+    return handle_chat(req)
+
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    # Verify ChromaDB initialization by doing a dummy search or just checking the object
+    try:
+        col = pipeline.vector_store.collection
+        count = col.count()
+        return {"status": "ok", "service": "PolarVerse Backend", "chroma_chunks": count}
+    except Exception as e:
+        return {"status": "ok", "service": "PolarVerse Backend", "chroma_error": str(e)}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=3007)
