@@ -1,0 +1,7 @@
+node_modules/
+dist/
+polar-ai/venv/
+polar-ai/__pycache__/
+polar-ai/database/
+.git/
+.env
